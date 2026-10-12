@@ -36,8 +36,7 @@ spec:
 
     # Tell konflux to read the tag from Containerfile label.
     - name: additional-tags-from-label
-      value:
-        - konflux.additional-tags
+      value: konflux.additional-tags
 
   pipelineRef:
     name: pipeline-build-multiarch
