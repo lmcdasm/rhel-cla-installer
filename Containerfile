@@ -1,5 +1,4 @@
-# https://github.com/operator-framework/ansible-operator-plugins/blob/main/images/ansible-operator/Dockerfile
-FROM quay.io/operator-framework/ansible-operator:v1.42.3 AS final
+FROM registry.redhat.io/openshift4/ose-ansible-rhel9-operator:v4.20@sha256:93524beefa83bff111f15594480756018b1bc69e1e38de07e2a06d2041de1227 AS final
 
 ARG VERSION=2.0.0
 
