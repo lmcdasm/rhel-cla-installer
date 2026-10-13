@@ -19,6 +19,6 @@ RUN ansible-galaxy collection install -r ${HOME}/requirements.yml \
  && chmod -R ug+rwx ${HOME}/.ansible
 
 COPY watches.yaml ${HOME}/watches.yaml
-COPY collections/ansible_collections/rhel_lightspeed ${HOME}/collections/ansible_collections/rhel_lightspeed
+COPY collections/ansible_collections/rhel ${HOME}/collections/ansible_collections/rhel
 
 LABEL konflux.additional-tags=${VERSION}

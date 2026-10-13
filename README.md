@@ -41,7 +41,7 @@ This is the installer for the self-managed RHEL CLA. It supports local, remote i
 
     ```
     cd local
-    ./rhel-cla-installer rhel_lightspeed.cla.local
+    ./rhel-cla-installer rhel.cla.local
     ```
 
     Adjust verbosity by adding `-v`. More v's give more verbosity.
@@ -59,7 +59,7 @@ sudo systemctl lightspeed-stack.service
 
 ### Uninstall ###
 
-Run `./rhel-cla-installer rhel_lightspeed.cla.uninstall_local`.
+Run `./rhel-cla-installer rhel.cla.uninstall_local`.
 
 
 [`podman`]: https://podman.io/

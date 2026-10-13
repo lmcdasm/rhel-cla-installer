@@ -1,2 +1,3 @@
 /ansible_collections/*
 !/ansible_collections/rhel_lightspeed/
+!/ansible_collections/rhel/

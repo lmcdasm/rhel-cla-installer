@@ -1,7 +1,6 @@
-- name: Remove a local RHEL CLA installation
-  hosts: localhost
+- name: Remove RHEL CLA
+  hosts: all
   become: yes
-  gather_facts: no
 
   handlers:
     - name: reset-failed
@@ -19,17 +18,17 @@
 
   tasks:
     - import_role:
-        name: cla_pod
+        name: rhel.cla.pod
         tasks_from: remove
 
     - import_role:
-        name: rhel_knowledge_bridge
+        name: rhel.cla.rhel_knowledge_bridge
         tasks_from: remove
 
     - import_role:
-        name: okp
+        name: rhel.cla.okp
         tasks_from: remove
 
     - import_role:
-        name: lightspeed_stack
+        name: rhel.cla.lightspeed_stack
         tasks_from: remove

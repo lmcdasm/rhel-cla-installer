@@ -1,0 +1,16 @@
+namespace: rhel
+name: cla
+version: 1.0.0
+readme: ~
+authors:
+  - Sam Doran <sdoran@redhat.com>
+
+description: Install the RHEL Command Line Assistant
+license:
+  - Apache-2.0
+
+tags: []
+dependencies: {}
+repository: https://github.com/rhel-lightspeed/rhel-cla-installer
+issues: https://github.com/rhel-lightspeed/rhel-cla-installer/issues
+

@@ -1,0 +1,17 @@
+- name: Setup RHEL CLA in K8S
+  hosts: localhost
+  gather_facts: no
+  become: no
+
+  tasks:
+    - import_role:
+        name: rhel.cla.okp
+        tasks_from: k8s
+
+    - import_role:
+        name: rhel.cla.rhel_knowledge_bridge
+        tasks_from: k8s
+
+    - import_role:
+        name: rhel.cla.lightspeed_stack
+        tasks_from: k8s

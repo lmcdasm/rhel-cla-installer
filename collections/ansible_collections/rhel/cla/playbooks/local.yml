@@ -14,14 +14,14 @@
 
   tasks:
     - import_role:
-        name: cla_pod
+        name: rhel.cla.pod
 
     - import_role:
-        name: okp
+        name: rhel.cla.okp
 
     - import_role:
-        name: rhel_knowledge_bridge
+        name: rhel.cla.rhel_knowledge_bridge
 
     - import_role:
-        name: lightspeed_stack
+        name: rhel.cla.lightspeed_stack
 
