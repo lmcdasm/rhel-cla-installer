@@ -24,6 +24,8 @@ COPY collections/ansible_collections/rhel ${HOME}/collections/ansible_collection
 LABEL konflux.additional-tags=$VERSION
 LABEL version=$VERSION
 
+COPY licenses/ /licenses/
+
 
 # 2026-10-13
 FROM registry.access.redhat.com/ubi10/ubi:10.2-1791893534@sha256:a75ad754aa048d808dd3260243452f8c9a665831d0493b4c9d92f0c88fe2f8c3 AS builder
