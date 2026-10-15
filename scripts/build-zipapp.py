@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import platform
 import shutil
 import subprocess
 import venv
@@ -14,33 +13,7 @@ def create_venv(name: str) -> Path:
     return target_venv
 
 
-def install_build_deps() -> None:
-    """Install required packages only for s390x"""
-
-    arch = platform.machine()
-    packages = [
-        "gcc",
-        "libffi-devel",
-        "openssl-devel",
-        "python3-devel",
-        "rust-toolset",
-    ]
-    # fmt: off
-    command = [
-        "dnf", "install", "-y",
-        "--setopt", "install_weak_deps=False",
-        "--setopt", "tsflags=nodocs",
-        *packages,
-    ]
-    # fmt: on
-    if arch == "s390x":
-        print(f"Installing build dependencies for {arch}...")
-        subprocess.check_call(command)
-
-
 def main():
-    install_build_deps()
-
     # Install shiv
     print("Installing build tools...")
     build_venv = create_venv("tools")
