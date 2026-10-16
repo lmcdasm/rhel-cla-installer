@@ -61,8 +61,8 @@ Check the pod and container status.
 ```
 sudo systemctl status rhel-cla-pod.service
 sudo systemctl status rhel-knowledge-bridge.service
-sudo systemctl rh-offline-knowledge-portal.service
-sudo systemctl lightspeed-stack.service
+sudo systemctl status rh-offline-knowledge-portal.service
+sudo systemctl status lightspeed-stack.service
 ```
 
 ### Uninstall ###
