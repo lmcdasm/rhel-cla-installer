@@ -73,7 +73,7 @@ all: docker-build
 help: ## Display this help.
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-##@ Build
+##@ Operator
 
 .PHONY: run
 ANSIBLE_ROLES_PATH?="$(shell pwd)/roles"
@@ -101,8 +101,6 @@ docker-buildx: ## Build and push docker image for the manager for cross-platform
 	docker buildx use project-v3-builder
 	- docker buildx build --push --platform=$(PLATFORMS) --tag ${IMG} -f Dockerfile .
 	- docker buildx rm project-v3-builder
-
-##@ Deployment
 
 ifndef ignore-not-found
   ignore-not-found = false
@@ -231,3 +229,16 @@ catalog-build: opm ## Build a catalog image.
 .PHONY: catalog-push
 catalog-push: ## Push a catalog image.
 	$(MAKE) docker-push IMG=$(CATALOG_IMG)
+
+##@ Installer
+
+RLP_VERSION = 0.30.1
+RLP_IMAGE ?= rpm-lockfile-prototype:$(RLP_VERSION)
+.PHONY: _rpm-lockfile-prototype-image
+rpm-lockfile-prototype-image: ## Build the containerized rpm-lockfile-prototype (requires podman).
+	curl -s https://raw.githubusercontent.com/konflux-ci/rpm-lockfile-prototype/refs/tags/v$(RLP_VERSION)/Containerfile | \
+		podman build -t localhost/$(RLP_IMAGE) -
+
+.PHONY: rpm-lock
+rpm-lock: _rpm-lockfile-prototype-image ## Regenerate .konflux/rpms/rpms.lock.yaml (requires podman and network access).
+	podman run --rm -v "$(shell pwd):/work:z" -w /work $(RLP_IMAGE) .konflux/rpms/rpms.in.yaml --outfile .konflux/rpms/rpms.lock.yaml

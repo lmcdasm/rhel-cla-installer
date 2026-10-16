@@ -1,0 +1,50 @@
+# Input for rpm-lockfile-prototype. Generate .konflux/rpms/rpms.lock.yaml with:
+#
+#   make rpm-lock
+#
+# The lockfile is consumed by Hermeto during the Konflux prefetch-dependencies
+# task and makes installing rpms in the Containerfile work under
+# hermetic (network-isolated) builds. Regenerate whenever the runtime base
+# image in the Containerfile or this file changes.
+
+contentOrigin:
+  repos:
+    - repoid: public-hummingbird-rpms
+      baseurl: https://console.redhat.com/api/pulp-content/public-hummingbird/$basearch/
+    - repoid: public-hummingbird-source-rpms
+      baseurl: https://console.redhat.com/api/pulp-content/public-hummingbird/source/
+    - repoid: ubi-10-baseos-rpms
+      baseurl: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi10/10/$basearch/baseos/os
+    # Source RPMs for the Konflux source-image build.
+    - repoid: ubi-10-baseos-source-rpms
+      baseurl: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi10/10/$basearch/baseos/source/SRPMS
+
+packages:
+  # Used by the final image to help extract the installer
+  - tar
+  # Dependencies for the builder phase.
+  #   Rust/cargo/gcc are mainly used for pydantic-core and cryptography.
+  - python3.12-devel
+  - gcc
+  - gcc-c++
+  - openssl-devel
+  - rust
+  - cargo
+  - pkgconf
+  - libffi-devel
+
+# Match `--setopt install_weak_deps=0` used by microdnf in the Containerfile.
+installWeakDeps: false
+
+# Resolve against the builder image: its installed packages are excluded
+# from the lockfile. Without an explicit context the resolving environment
+# is used instead, which silently drops packages (e.g. gmp/mpfr) that the
+# builder image does not actually provide and the hermetic toolchain
+# install then fails to resolve dependencies.
+context:
+  image: registry.access.redhat.com/hi/python:3.12-builder
+
+arches:
+  # Must match the build-platforms configured in .tekton/pipeline-build-multiarch.yaml.
+  - x86_64
+  - aarch64
