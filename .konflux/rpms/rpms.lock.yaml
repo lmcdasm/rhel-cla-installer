@@ -18,13 +18,13 @@ arches:
     name: binutils
     evr: 2.46.1-1.4.hum1
     sourcerpm: binutils-2.46.1-1.4.hum1.src.rpm
-  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/aarch64/Packages/c/cargo-1.99.0-1.hum1.aarch64.rpm
+  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/aarch64/Packages/c/cargo-1.99.0-1.1.hum1.aarch64.rpm
     repoid: public-hummingbird-rpms
-    size: 7701584
-    checksum: sha256:6ac11e511ff5531a9abbf23e9d19c31851776fb6c15fdb6ce9df52700638053e
+    size: 7698803
+    checksum: sha256:603acd4c6388bac427eaeab2f701f26fc06f2108969b8334fa8549c964558b61
     name: cargo
-    evr: 1.99.0-1.hum1
-    sourcerpm: rust-1.99.0-1.hum1.src.rpm
+    evr: 1.99.0-1.1.hum1
+    sourcerpm: rust-1.99.0-1.1.hum1.src.rpm
   - url: https://console.redhat.com/api/pulp-content/public-hummingbird/aarch64/Packages/c/cpp-16.2.1-3.1.hum1.aarch64.rpm
     repoid: public-hummingbird-rpms
     size: 14018630
@@ -242,20 +242,20 @@ arches:
     name: python3.12-devel
     evr: 3.12.15-1.1.hum1
     sourcerpm: python3.12-3.12.15-1.1.hum1.src.rpm
-  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/aarch64/Packages/r/rust-1.99.0-1.hum1.aarch64.rpm
+  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/aarch64/Packages/r/rust-1.99.0-1.1.hum1.aarch64.rpm
     repoid: public-hummingbird-rpms
-    size: 30390021
-    checksum: sha256:5bbad597678624a37d2f3c2649b201b54a749878cd5c79bacabca40ad2d297fa
+    size: 30379636
+    checksum: sha256:84f1c4d8d53b4f230a3d6c6576ac03ab807624175bce3c92aec5fa34771cf142
     name: rust
-    evr: 1.99.0-1.hum1
-    sourcerpm: rust-1.99.0-1.hum1.src.rpm
-  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/aarch64/Packages/r/rust-std-static-1.99.0-1.hum1.aarch64.rpm
+    evr: 1.99.0-1.1.hum1
+    sourcerpm: rust-1.99.0-1.1.hum1.src.rpm
+  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/aarch64/Packages/r/rust-std-static-1.99.0-1.1.hum1.aarch64.rpm
     repoid: public-hummingbird-rpms
-    size: 42869327
-    checksum: sha256:a622bd637e8d19993cc07521618f6a270d63d0a34ce155fa99b5b7acbdb453e0
+    size: 43011683
+    checksum: sha256:fae880a5b1ada335c66412003c3a4067387c7bb2bac8ca2348601082a86bcb88
     name: rust-std-static
-    evr: 1.99.0-1.hum1
-    sourcerpm: rust-1.99.0-1.hum1.src.rpm
+    evr: 1.99.0-1.1.hum1
+    sourcerpm: rust-1.99.0-1.1.hum1.src.rpm
   source:
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi10/10/aarch64/baseos/source/SRPMS/Packages/t/tar-1.35-13.el10_2.src.rpm
     repoid: ubi-10-baseos-source-rpms
@@ -383,12 +383,12 @@ arches:
     checksum: sha256:1e8539d4e16e3f7cdb2dc0a41719841d20040f7c2163f40c873cd360afccb161
     name: python3.12
     evr: 3.12.15-1.1.hum1
-  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/source/Packages/r/rust-1.99.0-1.hum1.src.rpm
+  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/source/Packages/r/rust-1.99.0-1.1.hum1.src.rpm
     repoid: public-hummingbird-source-rpms
-    size: 268097187
-    checksum: sha256:a8670b5a468978a4afd150de6c5cb1dae78d4a42241729fdbfceb332e58048ee
+    size: 268103154
+    checksum: sha256:b77f9c6ffc3a3d1bbcbf78f6227dcbbfb785283dfec59d086d6febb34f38c722
     name: rust
-    evr: 1.99.0-1.hum1
+    evr: 1.99.0-1.1.hum1
   module_metadata: []
 - arch: x86_64
   packages:
@@ -406,13 +406,13 @@ arches:
     name: binutils
     evr: 2.46.1-1.4.hum1
     sourcerpm: binutils-2.46.1-1.4.hum1.src.rpm
-  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/x86_64/Packages/c/cargo-1.99.0-1.hum1.x86_64.rpm
+  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/x86_64/Packages/c/cargo-1.99.0-1.1.hum1.x86_64.rpm
     repoid: public-hummingbird-rpms
-    size: 8278847
-    checksum: sha256:7c9baffd424899182725cd7cdaaa3a6141970532c3cad8cfd75f8104d61df3e6
+    size: 8279253
+    checksum: sha256:4091f2a36aadfcb417228ec8acfc4d2566d83736f9132182bda79fd2a8b1ec1d
     name: cargo
-    evr: 1.99.0-1.hum1
-    sourcerpm: rust-1.99.0-1.hum1.src.rpm
+    evr: 1.99.0-1.1.hum1
+    sourcerpm: rust-1.99.0-1.1.hum1.src.rpm
   - url: https://console.redhat.com/api/pulp-content/public-hummingbird/x86_64/Packages/c/cpp-16.2.1-3.1.hum1.x86_64.rpm
     repoid: public-hummingbird-rpms
     size: 15372578
@@ -616,20 +616,20 @@ arches:
     name: python3.12-devel
     evr: 3.12.15-1.1.hum1
     sourcerpm: python3.12-3.12.15-1.1.hum1.src.rpm
-  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/x86_64/Packages/r/rust-1.99.0-1.hum1.x86_64.rpm
+  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/x86_64/Packages/r/rust-1.99.0-1.1.hum1.x86_64.rpm
     repoid: public-hummingbird-rpms
-    size: 32476107
-    checksum: sha256:49a0ecd5749baa199c5b28c3f4a11c7d1356a85a51b32caf1ee4e65e4e5c7587
+    size: 32478809
+    checksum: sha256:ec74b337526cf4f575ce834395c3c170f927d5a377aff58ed3d98916a950cecb
     name: rust
-    evr: 1.99.0-1.hum1
-    sourcerpm: rust-1.99.0-1.hum1.src.rpm
-  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/x86_64/Packages/r/rust-std-static-1.99.0-1.hum1.x86_64.rpm
+    evr: 1.99.0-1.1.hum1
+    sourcerpm: rust-1.99.0-1.1.hum1.src.rpm
+  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/x86_64/Packages/r/rust-std-static-1.99.0-1.1.hum1.x86_64.rpm
     repoid: public-hummingbird-rpms
-    size: 42853369
-    checksum: sha256:08749cde57521305fa1815716e889e16a8dca3841623c9d9531d42fa9880d9f0
+    size: 42864165
+    checksum: sha256:0866d4b0c3c0f9a1c9fc99e98d25d1189c2e8fe2dba136ec176fee76c84a3999
     name: rust-std-static
-    evr: 1.99.0-1.hum1
-    sourcerpm: rust-1.99.0-1.hum1.src.rpm
+    evr: 1.99.0-1.1.hum1
+    sourcerpm: rust-1.99.0-1.1.hum1.src.rpm
   source:
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi10/10/x86_64/baseos/source/SRPMS/Packages/t/tar-1.35-13.el10_2.src.rpm
     repoid: ubi-10-baseos-source-rpms
@@ -757,10 +757,10 @@ arches:
     checksum: sha256:1e8539d4e16e3f7cdb2dc0a41719841d20040f7c2163f40c873cd360afccb161
     name: python3.12
     evr: 3.12.15-1.1.hum1
-  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/source/Packages/r/rust-1.99.0-1.hum1.src.rpm
+  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/source/Packages/r/rust-1.99.0-1.1.hum1.src.rpm
     repoid: public-hummingbird-source-rpms
-    size: 268097187
-    checksum: sha256:a8670b5a468978a4afd150de6c5cb1dae78d4a42241729fdbfceb332e58048ee
+    size: 268103154
+    checksum: sha256:b77f9c6ffc3a3d1bbcbf78f6227dcbbfb785283dfec59d086d6febb34f38c722
     name: rust
-    evr: 1.99.0-1.hum1
+    evr: 1.99.0-1.1.hum1
   module_metadata: []
