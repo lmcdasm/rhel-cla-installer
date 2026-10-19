@@ -5,7 +5,7 @@
 # s390x for gcc/libffi-devel/openssl-devel/python3-devel/rust-toolset.
 # This stage is ephemeral; only /opt/rhel-cla-installer is copied out.
 # ──────────────────────────────────────────────────────────────────────────────
-FROM registry.access.redhat.com/hi/python:3.12-builder AS builder
+FROM registry.access.redhat.com/hi/python:3.12-builder@sha256:d7e47ff8d9d9b612eaefb5925fcfd36e38c5ce622dc7f0f0508b4fdd090a1510 AS builder
 
 USER 0
 
@@ -27,7 +27,7 @@ COPY scripts/build-zipapp.py /opt/setup/
 RUN /opt/setup/build-zipapp.py
 
 
-FROM registry.access.redhat.com/ubi10-minimal:10.2-1791784796
+FROM registry.access.redhat.com/ubi10-minimal:10.2-1791784796@sha256:9712ae522acef7e90c571280b4faf69614b59395448d6bfb1c780c3bbf168218
 
 ARG VERSION=2.0.0
 
