@@ -11,3 +11,6 @@ rkb_cpu_request: 250m
 rkb_cpu_limit: 1
 rkb_memory_request: 256Mi
 rkb_memory_limit: 512Mi
+
+okp_name: rh-offline-knowledge-portal
+okp_port: 8983

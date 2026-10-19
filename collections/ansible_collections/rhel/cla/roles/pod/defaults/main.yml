@@ -1,2 +1,5 @@
 cla_pod_name: rhel-cla
-cla_publish_port: 8501:8501
+cla_port: 8080
+cla_publish_port: "{{ cla_port }}:{{ ls_port }}"
+
+ls_port: 8081

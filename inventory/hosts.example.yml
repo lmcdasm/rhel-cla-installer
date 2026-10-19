@@ -3,5 +3,3 @@ all:
 
   vars:
     okp_access_key: ~
-    okp_name: rh-offline-knowledge-portal
-    okp_solr_port: 8983
