@@ -1,0 +1,6 @@
+/local:
+  plan:
+    import:
+      url: https://gitlab.cee.redhat.com/rhel-lightspeed/enhanced-shell/rhel-cla-installer-tests.git
+      name: /plans/local
+      ref: "mlitwora/add-basic-scenario"
