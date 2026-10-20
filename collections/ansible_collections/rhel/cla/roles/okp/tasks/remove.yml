@@ -8,7 +8,7 @@
     - "{{ okp_name }}-image"
   ignore_errors: yes
   tags:
-  - okp
+    - okp
 
 - name: Remove unit files
   file:
@@ -19,4 +19,11 @@
     - "{{ okp_name }}.image"
   notify: cleanup
   tags:
-  - okp
+    - okp
+
+- name: Remove container image
+  command: podman rmi {{ okp_container_image }}:{{ okp_container_image_tag }}
+  failed_when: no
+  when: remove_images is defined
+  tags:
+    - rkb

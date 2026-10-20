@@ -16,5 +16,3 @@
     daemon_reload: yes
   tags:
     - rkb
-
-- import_tasks: validate.yml

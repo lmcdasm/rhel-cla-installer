@@ -1,0 +1,51 @@
+# {{ ansible_managed }}
+{#
+See https://github.com/lightspeed-core/lightspeed-stack/tree/release/0.6/examples
+for example configs
+#}
+name: lightspeed-stack
+
+service:
+  host: "{{ ls_host }}"
+  port: {{ ls_port }}
+  root_path: /api/lightspeed
+  auth_enabled: {{ ls_auth_enabled }}
+  workers: {{ ls_workers }}
+
+authorization:
+  access_rules:
+    - role: "*"
+      actions:
+        - rlsapi_v1_infer
+        - get_metrics
+        - info
+
+conversation_cache:
+  type: noop
+
+inference:
+  default_provider: {{ ls_provider }}
+  default_model: {{ ls_default_model }}
+
+customization:
+  system_prompt_path: /app-root/system_prompt.txt
+  disable_query_system_prompt: true
+  disable_shield_ids_override: true
+
+mcp_servers:
+  - name: rhel-knowledge-bridge
+    provider_id: model-context-protocol
+    url: http://{{ rkb_name }}:{{ rkb_port }}/mcp
+
+deployment_environment: {{ ls_deployment_environment }}
+
+splunk:
+  enabled: false
+
+user_data_collection:
+  feedback_enabled: false
+  transcripts_enabled: false
+
+llama_stack:
+  use_as_library_client: true
+  library_client_config_path: /app-root/llama-stack.yml

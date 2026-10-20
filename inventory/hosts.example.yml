@@ -3,3 +3,5 @@ all:
 
   vars:
     okp_access_key: ~
+    ls_provider: ~
+    ls_default_model: ~

@@ -1,6 +1,6 @@
 - name: Create config directory
   file:
-    path: /var/lib/containers/lightspeed-stack
+    path: "{{ ls_config_dir }}"
     state: directory
     mode: '0755'
     owner: root
@@ -11,10 +11,8 @@
 - name: Copy config files
   template:
     src: "{{ item }}"
-    dest: /var/lib/containers/lightspeed-stack/{{ item }}
-  loop:
-    - lightspeed-stack.yml
-    - system_prompt.txt
+    dest: "{{ ls_config_dir }}/{{ item | basename | replace('-' ~ _ls_major_version, '')}}"
+  loop: "{{ ls_config_files }}"
   notify: init
   tags:
     - ls

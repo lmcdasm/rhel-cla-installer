@@ -1,0 +1,1 @@
+_ls_major_version: "{{ '.'.join(ls_container_image_tag.split('.')[:-1]) }}"

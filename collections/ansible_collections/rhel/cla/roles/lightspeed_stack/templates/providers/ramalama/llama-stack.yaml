@@ -1,0 +1,101 @@
+# {{ ansible_managed }}
+version: 2
+image_name: ramalama-configuration
+external_providers_dir: /app-root/providers.d
+
+server:
+  port: 8321
+
+apis:
+  - inference
+  - agents
+  - safety
+  - vector_io
+  - files
+  - tool_runtime
+
+providers:
+  inference:
+    - provider_id: ramalama
+      provider_type: remote::openai
+      config:
+        api_key: "sk-no-key-required"
+        base_url: http://127.0.0.1:8000/v1
+
+  agents:
+    - provider_id: meta-reference
+      provider_type: inline::meta-reference
+      config:
+        persistence:
+          agent_state:
+            backend: kv_default
+            namespace: agents
+
+          responses:
+            backend: sql_default
+            table_name: responses
+
+  safety:
+    - provider_id: llama-guard
+      provider_type: inline::llama-guard
+      config: {}
+
+  files:
+    - provider_id: meta-reference-files
+      provider_type: inline::localfs
+      config:
+        storage_dir: /tmp/files
+        metadata_store:
+          backend: sql_default
+          table_name: files_metadata
+
+  vector_io:
+    - provider_id: faiss
+      provider_type: inline::faiss
+      config:
+        persistence:
+          backend: kv_default
+          namespace: "vector_io::faiss"
+
+  tool_runtime:
+    - provider_id: rag-runtime
+      provider_type: inline::rag-runtime
+      config: {}
+
+    - provider_id: model-context-protocol
+      provider_type: remote::model-context-protocol
+      config: {}
+
+storage:
+  backends:
+    kv_default:
+      type: kv_sqlite
+      db_path: /tmp/llama-store/kvstore.db
+
+    sql_default:
+      type: sql_sqlite
+      db_path: /tmp/llama-store/sqlstore.db
+
+  stores:
+    metadata:
+      namespace: registry
+      backend: kv_default
+
+    inference:
+      table_name: inference_store
+      backend: sql_default
+
+    conversations:
+      table_name: openai_conversations
+      backend: sql_default
+
+    prompts:
+      namespace: prompts
+      backend: kv_default
+
+models:
+  - model_id: {{ ls_providers.ramalama.model_id }}
+    provider_model_id: {{ ls_providers.ramalama.provider_model_id }}
+    provider_id: ramalama
+    model_type: llm
+    metadata: {}

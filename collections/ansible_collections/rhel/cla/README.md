@@ -13,6 +13,6 @@ Collection of roles and playbooks for self-managed RHEL CLA.
 
 **Removal**
 
-- rhel_cla.uninstall_local → Completely remove a local installation.
+- rhel_cla.local_uninstall → Completely remove a local installation.
 - rhel.cla.uninstall → Completely remove a remote installation.
-- rhel.cla.uninstall_k8s [WIP] → Remove the deployment and supporting components. Still under development.
+- rhel.cla.k8s_uninstall [WIP] → Remove the deployment and supporting components. Still under development.

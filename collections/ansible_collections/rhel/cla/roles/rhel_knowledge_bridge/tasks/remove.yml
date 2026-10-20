@@ -22,9 +22,8 @@
     - rkb
 
 - name: Remove container image
-  command: podman rmi {{ rkb_container_image }}
-  register: _rkb_rmi
-  changed_when: _rkb_rmi.rc == 0
-  failed_when: false
+  command: podman rmi {{ rkb_container_image }}:{{ rkb_container_image_tag }}
+  failed_when: no
+  when: remove_images is defined
   tags:
     - rkb

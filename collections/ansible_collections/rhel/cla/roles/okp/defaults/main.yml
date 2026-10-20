@@ -2,12 +2,12 @@ okp_name: rh-offline-knowledge-portal
 okp_container_image: registry.redhat.io/offline-knowledge-portal/rhokp-rhel9
 okp_container_image_tag: 1.2.9-1784730494
 
+okp_solr_host_bind: 0.0.0.0
 okp_port: 8983
 okp_replicas: 1
 okp_cpu_request: 1
 okp_cpu_limit: 2
 okp_memory_request: 2Gi
 okp_memory_limit: 4Gi
-okp_solr_jetty_host: 0.0.0.0
 okp_solr_log_level: INFO
 okp_access_key: ~

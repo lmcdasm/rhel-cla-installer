@@ -20,3 +20,17 @@
   notify: cleanup
   tags:
     - ls
+
+- name: Remove config directory
+  file:
+    path: "{{ ls_config_dir }}"
+    state: absent
+  tags:
+    - ls
+
+- name: Remove container image
+  command: podman rmi {{ ls_container_image }}:{{ ls_container_image_tag }}
+  failed_when: no
+  when: remove_images is defined
+  tags:
+    - ls

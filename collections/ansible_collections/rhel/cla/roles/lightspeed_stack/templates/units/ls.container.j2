@@ -6,29 +6,15 @@ Description=Lightspeed Stack
 Image={{ ls_name }}.image
 ContainerName={{ ls_name }}
 Pod={{ cla_pod_name }}.pod
+Exec=--config /app-root/lightspeed-stack.yml
+{% if ls_provider == "vertex" %}
+Secret={{ ls_providers.vertex.credentials_secret_name }},target=/run/secrets/{{ ls_providers.vertex.credentials_secret_name }},mode=440
+Environment=GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/{{ ls_providers.vertex.credentials_secret_name }}
+{% endif %}
 
-Environment=LIGHTSPEED_STACK_CONFIG_PATH=/app-root/lightspeed_stack.yml
-Environment=LIGHTSPEED_STACK_LOG_LEVEL={{ ls_log_level }}
-Environment=OGX_LOGGING={{ ls_ogx_logging }}
-
-Environment=GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/gcp_creds
-Environment=VERTEX_AI_LOCATION={{ ls_vertexai_location }}
-Environment=VERTEXAI_PROJECT_ID={{ ls_vertexai_project_id }}
-Environment=DEFAULT_MODEL={{ ls_default_model }}
-Environment=DEFAULT_PROVIDER={{ ls_default_provider }}
-
-Environment=LS_PORT={{ ls_port }}
-Environment=LS_DEPLOYMENT_ENVIRONMENT={{ ls_deployment_environment }}
-Environment=OTEL_SDK_DISABLED=true
-
-Environment=POSTGRES_HOST={{ ls_postgres_host }}
-Environment=POSTGRES_PORT={{ ls_postgres_port }}
-Environment=POSTGRES_DB={{ ls_postgres_db }}
-Environment=POSTGRES_USER={{ ls_postgres_user }}
-Environment=POSTGRES_PASSWORD={{ ls_postgres_password }}
-
-Volume=/var/lib/containers/lightspeed_stack.yml:/app-root/lightspeed_stack.yml
-Volume=/var/lib/containers/system_prompt.txt:/app-root/system_prompt.txt
+{% for file in ls_config_files %}
+Volume={{ ls_config_dir }}/{{ file | basename | replace('-' ~ _ls_major_version, '') }}:/app-root/{{ file | basename |replace('-' ~ _ls_major_version, '') }}:Z,ro
+{% endfor %}
 
 [Service]
 Restart=on-failure

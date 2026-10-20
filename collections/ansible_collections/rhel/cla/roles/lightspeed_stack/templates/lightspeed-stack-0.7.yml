@@ -3,7 +3,7 @@ name: lightspeed-stack
 
 service:
   host: 0.0.0.0
-  port: ${env.LS_PORT}
+  port: {{ ls_port }}
   root_path: /api/lightspeed
   auth_enabled: true
   workers: 1
@@ -28,8 +28,8 @@ conversation_cache:
   type: noop
 
 inference:
-  default_model: ${env.DEFAULT_MODEL}
-  default_provider: ${env.DEFAULT_PROVIDER}
+  default_provider: {{ ls_provider }}
+  default_model: {{ ls_default_model }}
 
 customization:
   system_prompt_path: /app-root/system_prompt.txt
@@ -41,7 +41,7 @@ mcp_servers:
     provider_id: model-context-protocol
     url: http://okp-mcp:8000/mcp
 
-deployment_environment: ${env.LS_DEPLOYMENT_ENVIRONMENT}
+# deployment_environment: {{ ls_deployment_environment }}
 
 splunk:
   enabled: false
@@ -50,13 +50,7 @@ user_data_collection:
   feedback_enabled: false
   transcripts_enabled: false
 
-quota_handlers:
-  postgres:
-    host: ${env.POSTGRES_HOST}
-    port: ${env.POSTGRES_PORT}
-    db: ${env.POSTGRES_DB}
-    user: ${env.POSTGRES_USER}
-    password: ${env.POSTGRES_PASSWORD}
+# quota_handlers: {{ ls_quota_handlers }}
 
 ogx:
   use_as_library_client: true
@@ -76,11 +70,11 @@ ogx:
         - vector_io
 
       models:
-        - model_id: ${env.DEFAULT_MODEL}
+        - model_id: {{ ls_provider }}
           model_type: llm
           provider_id: vertex-model-garden
           metadata: {}
-          provider_model_id: ${env.DEFAULT_MODEL}
+          provider_model_id: {{ ls_provider }}
 
       providers:
         files:
