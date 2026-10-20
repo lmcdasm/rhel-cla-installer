@@ -88,13 +88,13 @@ arches:
     name: jansson
     evr: 2.14-5.1.hum1
     sourcerpm: jansson-2.14-5.1.hum1.src.rpm
-  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/aarch64/Packages/k/kernel-headers-7.2.0-61.1.hum1.aarch64.rpm
+  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/aarch64/Packages/k/kernel-headers-7.3.0-65.hum1.aarch64.rpm
     repoid: public-hummingbird-rpms
-    size: 1872564
-    checksum: sha256:1ddc5cb3bc4be4eb81c267d1caa8e5314456baad5ae94b56c06c52035bcddf81
+    size: 1884694
+    checksum: sha256:8a842865213a479203259a67e04bd948a2cb6df75dcf6af9357501a94bc0b25e
     name: kernel-headers
-    evr: 7.2.0-61.1.hum1
-    sourcerpm: kernel-headers-7.2.0-61.1.hum1.src.rpm
+    evr: 7.3.0-65.hum1
+    sourcerpm: kernel-headers-7.3.0-65.hum1.src.rpm
   - url: https://console.redhat.com/api/pulp-content/public-hummingbird/aarch64/Packages/l/libasan-16.2.1-3.1.hum1.aarch64.rpm
     repoid: public-hummingbird-rpms
     size: 534509
@@ -299,12 +299,12 @@ arches:
     checksum: sha256:c3a722c87d666412ff7b6c7a41616dbd1da0013b1c239e411f3086be3d18d70c
     name: jansson
     evr: 2.14-5.1.hum1
-  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/source/Packages/k/kernel-headers-7.2.0-61.1.hum1.src.rpm
+  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/source/Packages/k/kernel-headers-7.3.0-65.hum1.src.rpm
     repoid: public-hummingbird-source-rpms
-    size: 4157522
-    checksum: sha256:ab7e2738d66f7b4a13cb92e30c0e990035c7c0ad850cb8262ec0e23efd405c06
+    size: 4268523
+    checksum: sha256:2cfefdc04dc453f3acf3dfba35885d0f08603f078b77e3e0e4d0383f4990d676
     name: kernel-headers
-    evr: 7.2.0-61.1.hum1
+    evr: 7.3.0-65.hum1
   - url: https://console.redhat.com/api/pulp-content/public-hummingbird/source/Packages/l/libedit-3.1-60.20260512cvs.1.hum1.src.rpm
     repoid: public-hummingbird-source-rpms
     size: 587810
@@ -476,13 +476,13 @@ arches:
     name: jansson
     evr: 2.14-5.1.hum1
     sourcerpm: jansson-2.14-5.1.hum1.src.rpm
-  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/x86_64/Packages/k/kernel-headers-7.2.0-61.1.hum1.x86_64.rpm
+  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/x86_64/Packages/k/kernel-headers-7.3.0-65.hum1.x86_64.rpm
     repoid: public-hummingbird-rpms
-    size: 1908991
-    checksum: sha256:2ea658040c3a66b9fa39d8c359331cf4850818ea101fbb0d1d7cf27f19dfe5ca
+    size: 1922779
+    checksum: sha256:3f0b6ccd52d95f876c615c0d571c23fd32f780b61ef29de51b0b20281a19ddec
     name: kernel-headers
-    evr: 7.2.0-61.1.hum1
-    sourcerpm: kernel-headers-7.2.0-61.1.hum1.src.rpm
+    evr: 7.3.0-65.hum1
+    sourcerpm: kernel-headers-7.3.0-65.hum1.src.rpm
   - url: https://console.redhat.com/api/pulp-content/public-hummingbird/x86_64/Packages/l/libatomic-16.2.1-3.1.hum1.x86_64.rpm
     repoid: public-hummingbird-rpms
     size: 63058
@@ -673,12 +673,12 @@ arches:
     checksum: sha256:c3a722c87d666412ff7b6c7a41616dbd1da0013b1c239e411f3086be3d18d70c
     name: jansson
     evr: 2.14-5.1.hum1
-  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/source/Packages/k/kernel-headers-7.2.0-61.1.hum1.src.rpm
+  - url: https://console.redhat.com/api/pulp-content/public-hummingbird/source/Packages/k/kernel-headers-7.3.0-65.hum1.src.rpm
     repoid: public-hummingbird-source-rpms
-    size: 4157522
-    checksum: sha256:ab7e2738d66f7b4a13cb92e30c0e990035c7c0ad850cb8262ec0e23efd405c06
+    size: 4268523
+    checksum: sha256:2cfefdc04dc453f3acf3dfba35885d0f08603f078b77e3e0e4d0383f4990d676
     name: kernel-headers
-    evr: 7.2.0-61.1.hum1
+    evr: 7.3.0-65.hum1
   - url: https://console.redhat.com/api/pulp-content/public-hummingbird/source/Packages/l/libedit-3.1-60.20260512cvs.1.hum1.src.rpm
     repoid: public-hummingbird-source-rpms
     size: 587810
