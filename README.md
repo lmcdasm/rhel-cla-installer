@@ -102,6 +102,22 @@ This will keep container images on the system by default. To remove container im
 ./rhel-cla-installer rhel.cla.local_uninstall -e remove_images=yes
 ```
 
+### Client Configurations ###
+
+#### Goose (goose-redhat)
+
+
+1. Add the following to the `[backend]` section of `/etc/xdg/goose-proxy/config.toml`:
+
+    ```toml
+    endpoint = "http://127.0.0.1:8080/v1"
+    ```
+
+1. Restart the proxy.
+
+    ```
+    sudo systemctl restart goose-proxy
+    ```
 
 [`podman`]: https://podman.io/
 [rhokp_key]: https://access.redhat.com/offline/access/
