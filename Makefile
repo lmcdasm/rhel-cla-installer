@@ -246,3 +246,7 @@ rpm-lock: _rpm-lockfile-prototype-image ## Regenerate .konflux/rpms/rpms.lock.ya
 .PHONY: artifacts-lock
 artifacts-lock: ## Regenerate .konflux/artifacts/artifacts.lock.yaml (requires network access to galaxy.ansible.com).
 	python3 scripts/artifacts-lock.py
+
+.PHONY: build-deps
+build-deps: ## Regenerate the hash-pinned pip requirements in .konflux/pip/ (requires python3.12 and network access).
+	python3 scripts/build-deps.py
