@@ -232,6 +232,21 @@ catalog-push: ## Push a catalog image.
 
 ##@ Installer
 
+# Run Hermeto locally with the same input the Konflux pipeline uses, to
+# validate the prefetch (pip sdists + build deps, the RPM lockfile and the
+# galaxy collections). Requires podman; output lands in .hermeto-out/.
+HERMETO_IMAGE ?= quay.io/konflux-ci/hermeto:0.62.0
+HERMETO_PREFETCH_INPUT = '[{"type":"pip","path":".konflux/pip","requirements_files":["requirements-3.12.txt"],"requirements_build_files":["requirements-tools-3.12.txt","requirements-build-3.12.txt","requirements-build-legacy-3.12.txt"]},{"type":"rpm","path":".konflux/rpms"},{"type":"generic","path":".konflux/artifacts"}]'
+.PHONY: hermeto-prefetch
+hermeto-prefetch: ## Generate a hermeto artifact for testing locally with our artifacts
+	rm -rf .hermeto-out
+	podman run --rm -v "$(shell pwd):$(shell pwd):z" -w "$(shell pwd)" $(HERMETO_IMAGE) fetch-deps \
+		--source . --output ./.hermeto-out $(HERMETO_PREFETCH_INPUT)
+	podman run --rm -v "$(shell pwd):$(shell pwd):z" -w "$(shell pwd)" $(HERMETO_IMAGE) generate-env \
+		./.hermeto-out -o ./.hermeto-out/cachi2.env --for-output-dir /cachi2/output
+	podman run --rm -v "$(shell pwd):$(shell pwd):z" -w "$(shell pwd)" $(HERMETO_IMAGE) inject-files \
+		./.hermeto-out --for-output-dir /cachi2/output
+
 RLP_VERSION = 0.30.1
 RLP_IMAGE ?= rpm-lockfile-prototype:$(RLP_VERSION)
 .PHONY: _rpm-lockfile-prototype-image
@@ -247,6 +262,6 @@ rpm-lock: _rpm-lockfile-prototype-image ## Regenerate .konflux/rpms/rpms.lock.ya
 artifacts-lock: ## Regenerate .konflux/artifacts/artifacts.lock.yaml (requires network access to galaxy.ansible.com).
 	python3 scripts/artifacts-lock.py
 
-.PHONY: build-deps
-build-deps: ## Regenerate the hash-pinned pip requirements in .konflux/pip/ (requires python3.12 and network access).
-	python3 scripts/build-deps.py
+.PHONY: pip-deps
+pip-deps: ## Regenerate the hash-pinned pip requirements in .konflux/pip/ (requires python3.12 and network access).
+	python3 scripts/pip-deps.py

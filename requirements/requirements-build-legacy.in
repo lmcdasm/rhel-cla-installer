@@ -1,0 +1,12 @@
+# Older versions of backends that some sdists cap. Resolved separately from
+# requirements-build.in because one file can hold only one version of a
+# package. Each entry notes which sdists need it (see requirements-build.in).
+
+# via click, jinja2, pip, typing-extensions, wheel
+flit-core<4
+# via python-dateutil
+setuptools-scm<8
+# via ansible-core, charset-normalizer
+setuptools==84.0.0
+# via ansible-core
+wheel==0.45.1

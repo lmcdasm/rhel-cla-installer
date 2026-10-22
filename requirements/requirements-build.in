@@ -1,0 +1,42 @@
+# PEP 517 build backends needed to compile the pinned sdists from source.
+# Latest versions; packages that need older ones are covered by
+# requirements-build-legacy.in. Each entry notes which sdists need it
+# (from `pybuild-deps compile --annotation-style line`); re-check it when
+# the runtime or tools requirements change.
+
+# via trove-classifiers
+calver
+# via cryptography
+cffi
+# via pyyaml
+cython
+# via frozenlist, propcache, yarl
+expandvars
+# via idna, packaging, pathspec, wheel
+flit-core
+# via attrs, pydantic
+hatch-fancy-pypi-readme
+# via attrs, urllib3
+hatch-vcs
+# via annotated-types, attrs, expandvars, hatch-fancy-pypi-readme, hatch-vcs,
+# pydantic, typing-inspection, urllib3
+hatchling
+# via cryptography, pydantic-core
+maturin
+# via aiohttp
+pkgconfig
+# via aiohappyeyeballs, pkgconfig, tomlkit
+poetry-core
+# via setuptools-rust
+semantic-version
+# via aiohttp, aiosignal, calver, certifi, cffi, cryptography, frozenlist,
+# markupsafe, maturin, multidict, pathspec, pluggy, propcache, pycparser,
+# python-dateutil, pyyaml, requests, resolvelib, setuptools-rust,
+# setuptools-scm, shiv, trove-classifiers, vcs-versioning, websocket-client, yarl
+setuptools
+# via maturin
+setuptools-rust
+# via hatch-vcs, pluggy, setuptools-rust, urllib3
+setuptools-scm
+# via python-dateutil, resolvelib, shiv
+wheel

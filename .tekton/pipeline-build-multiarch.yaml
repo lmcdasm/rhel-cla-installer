@@ -46,15 +46,34 @@ spec:
       type: string
       default: "false"
 
+    # Run the container build without network access. All dependencies are
+    # prefetched by the prefetch-dependencies task (Hermeto).
+    # See below `prefetch-input` for location and tasks.
     - name: hermetic
       description: Execute the build with network isolation
       type: string
-      default: "false"
+      default: "true"
 
     - name: prefetch-input
       description: Build dependencies to be prefetched by Cachi2
       type: string
-      default: ""
+      default: >-
+        [
+          {
+            "type": "pip",
+            "path": ".konflux/pip",
+            "requirements_files": ["requirements-3.12.txt"],
+            "requirements_build_files": ["requirements-tools-3.12.txt", "requirements-build-3.12.txt", "requirements-build-legacy-3.12.txt"]
+          },
+          {
+            "type": "rpm",
+            "path": ".konflux/rpms"
+          },
+          {
+            "type": "generic",
+            "path": ".konflux/artifacts"
+          }
+        ]
 
     - name: image-expires-after
       description: Image tag expiration time, time values could be something like 1h, 2d, 3w for hours, days, and weeks, respectively.
