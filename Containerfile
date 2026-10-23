@@ -42,8 +42,8 @@ RUN /opt/setup/install-toolchain.sh
 RUN /opt/setup/build-zipapp.py
 
 
-# 2026-10-20
-FROM registry.access.redhat.com/ubi10-minimal:10.2-1792457157@sha256:c769ab6615ab32d02d5b3d65ff2eae6bc668ba823e77f46b78a4181f54d17a27
+# 2026-10-23
+FROM registry.access.redhat.com/ubi10-minimal:10.2-1792742351@sha256:ab67cd02caf8706e34a695a1432ebe965934f6128ec352a6c3f4048b43a4fb5e
 
 ARG VERSION=2.0.0
 
