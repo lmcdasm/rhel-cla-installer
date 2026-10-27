@@ -7,9 +7,11 @@
 #   cp granite.container.example ~/.config/containers/systemd/granite.container
 #   # edit Mount= src path after: ramalama pull hf://ibm-granite/granite-4.1-8b-GGUF:Q4_1
 #   # find model: find ~/.local/share/ramalama -name '*Q4_1*.gguf'
-#   loginctl enable-linger $USER
+#   sudo loginctl enable-linger $USER
 #   systemctl --user daemon-reload
-#   systemctl --user enable --now granite.service
+#   systemctl --user start granite.service
+#   # Skip systemctl --user enable (fails on generated Quadlets); linger +
+#   # [Install] WantedBy=default.target brings it up after reboot.
 #
 # System (rootful) install — better when exposing via reverse proxy later:
 #   sudo mkdir -p /etc/containers/systemd
