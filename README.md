@@ -155,6 +155,103 @@ Test the local API.
 curl http://localhost:8080/api/lightspeed/liveness
 ```
 
+### What now? (basic use cases) ###
+
+Once the stack is up, a `curl` liveness check is only the start. Typical next steps:
+
+#### 1. Open Lightspeed Core Stack in a browser ####
+
+Browse to the published CLA port (default `8080`), for example
+`http://<host>:8080`. You should see the **Lightspeed Core Stack** page with
+links to Swagger UI and ReDoc.
+
+#### 2. Install the `command-line-assistant` client ####
+
+On this host, or any host that can reach the CLA API:
+
+```
+sudo dnf install -y command-line-assistant
+```
+
+Point the client at the **local CLA / Lightspeed API** (not Granite directly —
+the Lightspeed stack is the front door):
+
+```
+sudoedit /etc/xdg/command-line-assistant/config.toml
+```
+
+Set something like:
+
+```toml
+endpoint = "http://127.0.0.1:8080/v1"
+```
+
+If that 404s, check which port the stack actually exposed
+(`sudo podman ps` / installer defaults — sometimes another mapped port) and use
+that host’s `/v1`.
+
+Restart the client daemon if present:
+
+```
+sudo systemctl restart clad 2>/dev/null || true
+```
+
+#### 3. Use it ####
+
+```
+c "how do I check disk usage on RHEL?"
+c "explain firewalld rich rules"
+c "how do I enable linger for a user?"
+```
+
+That is the product loop: ask RHEL ops questions → local model + offline
+knowledge answer, no cloud required.
+
+#### 4. What each piece is for ####
+
+| Piece | You use it for |
+| --- | --- |
+| `c "..."` client | Daily Q&A in the terminal |
+| Lightspeed Core Stack (`:8080`) | CLA API front door (browser UI, client `endpoint`) |
+| Granite (`:8000`) | LLM backend (usually invisible once CLA works) |
+| OKP + knowledge bridge | Offline Red Hat knowledge glued into answers |
+
+#### 5. Good first checks ####
+
+```
+c "what is SELinux enforcing mode and how do I check it?"
+c "how do I list failed systemd units?"
+```
+
+#### Further reading ####
+
+For more detailed install, config, and usage documentation:
+
+**RHEL 9**
+
+- Main guide (install / use / config):
+  [Interacting with the command-line assistant powered by RHEL Lightspeed][cla_rhel9]
+- Installing the client:
+  [Installing the command-line assistant][cla_rhel9_install]
+- Using `c` on RHEL systems:
+  [Using the command-line assistant on RHEL systems][cla_rhel9_use]
+
+**RHEL 10**
+
+- Main guide:
+  [Interacting with the command-line assistant powered by RHEL Lightspeed][cla_rhel10]
+- Disconnected / containerized CLA (closest to what this installer deploys):
+  [Containerized command-line assistant for disconnected environments][cla_rhel10_disconnected]
+
+**Related**
+
+- Offline Knowledge Portal:
+  [Deploy / launch RHOKP][rhokp_docs]
+- Dev preview overview (blog):
+  [Use the RHEL command-line assistant offline][cla_offline_blog]
+- Installer image (catalog):
+  [rhel-cla/installer-rhel10][cla_installer_catalog]
+
 ### Uninstall ###
 
 Run `./rhel-cla-installer rhel.cla.local_uninstall`
@@ -186,3 +283,11 @@ This will keep container images on the system by default. To remove container im
 [rhokp_key]: https://access.redhat.com/offline/access/
 [contributing]: docs/contributing.md
 [local_granite]: docs/local-granite-setup.md
+[cla_rhel9]: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/interacting_with_the_command-line_assistant_powered_by_rhel_lightspeed/index
+[cla_rhel9_install]: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/interacting_with_the_command-line_assistant_powered_by_rhel_lightspeed/installing-and-configuring-the-command-line-assistant-powered-by-rhel-lightspeed_using-command-line-assistant-to-manage-rhel-systems
+[cla_rhel9_use]: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/interacting_with_the_command-line_assistant_powered_by_rhel_lightspeed/using-the-command-line-assistant-powered-by-rhel-lightspeed-in-connected-rhel-systems_using-command-line-assistant-to-manage-rhel-systems
+[cla_rhel10]: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/interacting_with_the_command-line_assistant_powered_by_rhel_lightspeed/index
+[cla_rhel10_disconnected]: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/interacting_with_the_command-line_assistant_powered_by_rhel_lightspeed/containerized-command-line-assistant-for-disconnected-environments
+[rhokp_docs]: https://docs.redhat.com/en/documentation/red_hat_offline_knowledge_portal/1/install-proc_launching_rhokp
+[cla_offline_blog]: https://www.redhat.com/en/blog/use-rhel-command-line-assistant-offline-new-developer-preview
+[cla_installer_catalog]: https://catalog.redhat.com/en/software/containers/rhel-cla/installer-rhel10/68af1cbe4a00895806fa0b48
