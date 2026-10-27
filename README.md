@@ -111,6 +111,27 @@ vertex_config:
 
     Adjust verbosity by adding `-v`. More v's give more verbosity.
 
+    **Note (OKP / Offline Knowledge Portal):** The RHOKP image is large. The
+    installer often sits on `TASK [rhel.cla.okp : Start RHOKP]` for 10–30+ minutes
+    on a VM disk while Podman pulls and extracts the image. That is normal —
+    be patient. Do **not** Ctrl+C unless the pull process is gone and the unit
+    is `failed`.
+
+    When the image unit goes `active`/`dead` (success), the portal service should
+    start and the Ansible task should flip to `ok`/`changed`.
+
+    To watch progress in another terminal while that task is running:
+
+    ```
+    # still pulling/extracting?
+    pgrep -a 'pigz|storage-untar|podman image pull'
+    # or inspect a specific PID from the output above:
+    # ps -p <pid> -o etime,pcpu,pmem,cmd
+
+    # when the pull finishes you should see the image listed:
+    sudo podman images | grep rhokp
+    ```
+
 ### Verify Installation ###
 
 Check the pod and container status.
