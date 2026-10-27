@@ -98,7 +98,10 @@ flowchart LR
 ```text
 openshift-deployment/
   OC-Deployment.md                 # this file — plan, choices, diagrams
-  base/                            # Namespace, Deployments, Services, Route, SAs
+  Makefile                         # build / seed / apply / verify / status
+  examples/
+    command-line-assistant.config.toml.example
+  base/                            # Namespace, Deployments, Services, Route, SAs, PVC
     config/                        # Lightspeed config ported from the RHEL host
       lightspeed-stack.yml
       llama-stack.yml              # base_url -> http://10.20.1.200:8000/v1
@@ -106,8 +109,9 @@ openshift-deployment/
   overlays/lab/                    # Lab overlay (kustomize entrypoint)
   scripts/
     seed-secrets-from-rhel.sh      # pull-secret + okp-access-key from RHEL host
-    expose-lab-granite.sh          # PublishPort 0.0.0.0:8000 for option B
+    expose-lab-granite.sh          # optional: PublishPort 0.0.0.0:8000
     apply.sh                       # oc apply -k + wait
+    verify.sh                      # pods / route / Granite checks
 ```
 
 ---
@@ -140,9 +144,30 @@ Point `command-line-assistant` `endpoint` at `https://<route>/v1` (or http if te
 
 ---
 
+## Client tip
+
+See [`examples/command-line-assistant.config.toml.example`](examples/command-line-assistant.config.toml.example).
+Point `endpoint` at the **Route** `/v1`, not at Granite `:8000`.
+
+```bash
+make -C openshift-deployment status
+make -C openshift-deployment verify
+```
+
+## Troubleshooting / known issues
+
+| Symptom | Likely cause | What to do |
+| --- | --- | --- |
+| Pods stuck `ContainerCreating` / `Pulling` for a long time | OKP image is multi‑GB; registry pull is slow | Wait; `oc -n rhel-cla-system describe pod …` — `ErrImagePull` means auth/network, plain `Pulling` means still downloading |
+| `ErrImagePull` / `ImagePullBackOff` | Missing/invalid `redhat-pull-secret` | Re-run `RHEL_PASS=… ./scripts/seed-secrets-from-rhel.sh` |
+| Lightspeed Ready but chat fails | Cluster cannot reach `10.20.1.200:8000` | Confirm Granite listens on `0.0.0.0:8000`; open firewalld; test with `verify.sh` / an in-cluster `curl` pod |
+| OKP restarts lose knowledge index | Using emptyDir | Lab overlay uses a **40Gi PVC** (`rh-offline-knowledge-portal-data`) |
+| Route TLS / client errors | Edge termination + self-signed / corporate CA | Test with `curl -sk https://<route>/api/lightspeed/liveness` first |
+| Nested SSH seed script hangs | Fragile remote python over password SSH | Prefer current `seed-secrets-from-rhel.sh` (captures to files); or create secrets manually |
+
 ## Teardown
 
 ```bash
-oc delete project rhel-cla-system
-# optional: restore Granite PublishPort=127.0.0.1:8000:8000 on the RHEL host
+make -C openshift-deployment teardown
+# or: oc delete project rhel-cla-system
 ```

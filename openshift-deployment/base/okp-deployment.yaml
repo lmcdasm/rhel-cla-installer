@@ -47,6 +47,8 @@ spec:
           volumeMounts:
             - name: solr-data
               mountPath: /opt/solr/server/solr/portal/data
+          securityContext:
+            allowPrivilegeEscalation: false
           startupProbe:
             tcpSocket:
               port: solr
@@ -72,4 +74,5 @@ spec:
               memory: 4Gi
       volumes:
         - name: solr-data
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: rh-offline-knowledge-portal-data

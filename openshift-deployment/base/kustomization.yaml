@@ -6,6 +6,7 @@ namespace: rhel-cla-system
 resources:
   - namespace.yaml
   - okp-sa.yaml
+  - okp-pvc.yaml
   - okp-deployment.yaml
   - okp-service.yaml
   - rkb-sa.yaml

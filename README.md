@@ -1,6 +1,10 @@
 # Red Hat Enterprise Linux Command Line Assistant Installer #
 
-This is the installer for the self-managed RHEL CLA. It supports local and remote installations. OpenShift support is still in development.
+This is the installer for the self-managed RHEL CLA. It supports local and remote installations.
+
+For an OpenShift/Kubernetes manifest-based lab deployment (same images as the
+Podman Quadlet path, Granite left external for now), see
+[OpenShift deployment][ocp_deploy].
 
 # Getting Started #
 
@@ -129,3 +133,4 @@ This will keep container images on the system by default. To remove container im
 [`podman`]: https://podman.io/
 [rhokp_key]: https://access.redhat.com/offline/access/
 [contributing]: docs/contributing.md
+[ocp_deploy]: openshift-deployment/OC-Deployment.md

@@ -1,0 +1,15 @@
+# Example /etc/xdg/command-line-assistant/config.toml snippet for the OCP lab
+# overlay. Point the client at the Lightspeed Route (front door), NOT at Granite.
+#
+# After apply:
+#   oc -n rhel-cla-system get route lightspeed-stack -o jsonpath='{.spec.host}{"\n"}'
+#
+# Then set:
+
+endpoint = "https://lightspeed-stack-rhel-cla-system.apps.2026-prod-1.ocp.dasmlab.org/v1"
+
+# If your build expects a different path layout, try:
+# endpoint = "https://<route-host>/api/lightspeed/v1"
+#
+# Restart the daemon after editing:
+#   sudo systemctl restart clad
