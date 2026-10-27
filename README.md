@@ -66,6 +66,8 @@ vertex_config:
 
 1. Update the variables in `inventory/hosts.yml`, such as `okp_access_key`. Some variables depend on the external provider.
 
+    If using RamaLama with a local Granite model, see [How to set up a local Granite instance][local_granite].
+
 1. Run the installer. If a password is required for `sudo`, add the `-K` option and enter the password when prompted.
 
     **Note**: Do not run the installer using `sudo`. Run it as a normal account with `sudo` privileges.
@@ -129,3 +131,4 @@ This will keep container images on the system by default. To remove container im
 [`podman`]: https://podman.io/
 [rhokp_key]: https://access.redhat.com/offline/access/
 [contributing]: docs/contributing.md
+[local_granite]: docs/local-granite-setup.md
