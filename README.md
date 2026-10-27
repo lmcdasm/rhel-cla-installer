@@ -20,6 +20,30 @@ See the [contributing] docs for information on project development and maintenan
 - If using a provider that requires credentials stored in a file, create the secret in `podman`.
 - `sudo` permissions on all systems where RHEL CLA will be installed. This includes when installing locally.
 
+**Note (RHEL 9.x only):** The platform `python3` on RHEL 9 is 3.9 and is required by `dnf` and other system tooling.
+Do **not** remove Python 3.9. Install 3.11 alongside it and point the installer at 3.11:
+
+```
+sudo dnf install -y python3.11 python3.11-pip python3.11-devel
+python3 --version       # stays 3.9 (system) — expected
+python3.11 --version    # 3.11.x
+
+export ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3.11
+python3.11 ./rhel-cla-installer -K rhel.cla.local
+```
+
+Optional (user shell only — does not replace the system Python):
+
+```
+echo 'alias python3=python3.11' >> ~/.bashrc
+echo 'export ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3.11' >> ~/.bashrc
+source ~/.bashrc
+```
+
+Prefer `python3.11` / `ANSIBLE_PYTHON_INTERPRETER` over changing the system
+`/usr/bin/python3` via `alternatives`, so platform tools keep using 3.9.
+This note does not apply to RHEL 10+, where the system Python is already newer.
+
 Create the container registry login credentials. This needs to be done on both local and remote systems, or the auth file can be generated once and copied to remote systems.
 
 ```
@@ -71,6 +95,15 @@ vertex_config:
 1. Run the installer. If a password is required for `sudo`, add the `-K` option and enter the password when prompted.
 
     **Note**: Do not run the installer using `sudo`. Run it as a normal account with `sudo` privileges.
+
+    On RHEL 9.x, launch with Python 3.11 (see Prerequisites). Do not remove the system Python 3.9.
+
+    ```
+    export ANSIBLE_PYTHON_INTERPRETER=/usr/bin/python3.11
+    python3.11 ./rhel-cla-installer -K rhel.cla.local
+    ```
+
+    On hosts where `python3` is already 3.11+:
 
     ```
     ./rhel-cla-installer rhel.cla.local
