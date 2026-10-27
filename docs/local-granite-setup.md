@@ -91,6 +91,40 @@ ramalama list              # cached models
 podman logs -f granite
 ```
 
+## Persist across reboot (Quadlet) ##
+
+For a one-shot `ramalama serve -d` container, use the steps above. For a lab host
+that should keep serving after logout/reboot, install a user Quadlet instead.
+
+Files in this repo:
+
+- [`setup-granite-quadlet.sh`](setup-granite-quadlet.sh) — pulls the model, generates
+  the Quadlet with host-correct `Mount=` paths, enables linger, and starts the
+  user service
+- [`granite.container.example`](granite.container.example) — reference/fallback unit
+  (edit the `Mount=` src path if you install it by hand)
+
+On the RHEL host:
+
+```
+sudo dnf install -y podman
+curl -fsSL https://ramalama.ai/install.sh | bash
+chmod +x docs/setup-granite-quadlet.sh
+./docs/setup-granite-quadlet.sh
+```
+
+Override defaults with env vars if needed: `NAME`, `PORT`, `IMAGE`, `MODEL`,
+`QUADLET_DIR`.
+
+Ops after install:
+
+```
+systemctl --user status granite
+systemctl --user restart granite
+journalctl --user -u granite.service -f
+podman logs -f granite
+```
+
 ## Notes ##
 
 - This path is RamaLama + Podman + Granite GGUF for a local MVP. It does not install
@@ -99,5 +133,5 @@ podman logs -f granite
 - CPU inference is slower than GPU; that is fine for wiring CLA.
 - After local verification, add a reverse proxy and TLS for
   `granite.dasmlab.org`, then flip `base_url`.
-- Optional follow-up: a systemd/quadlet unit so the container survives reboot on
-  the lab host.
+- Prefer the Quadlet script for anything that must survive reboot; use
+  `granite.container.example` only as a manual fallback.

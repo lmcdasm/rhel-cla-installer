@@ -1,0 +1,45 @@
+# Example Quadlet for Granite 4.1 8B Q4_1 on CPU.
+# Prefer generating this with setup-granite-quadlet.sh so Mount= paths match
+# your host's RamaLama model store. This file is a reference / fallback.
+#
+# User (rootless) install:
+#   mkdir -p ~/.config/containers/systemd
+#   cp granite.container.example ~/.config/containers/systemd/granite.container
+#   # edit Mount= src path after: ramalama pull hf://ibm-granite/granite-4.1-8b-GGUF:Q4_1
+#   # find model: find ~/.local/share/ramalama -name '*Q4_1*.gguf'
+#   loginctl enable-linger $USER
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now granite.service
+#
+# System (rootful) install — better when exposing via reverse proxy later:
+#   sudo mkdir -p /etc/containers/systemd
+#   sudo cp ... /etc/containers/systemd/granite.container
+#   # model store is then under /var/lib/ramalama or root's ~/.local/share/ramalama
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now granite.service
+
+[Unit]
+Description=Granite 4.1 8B Q4_1 (RamaLama CPU) OpenAI-compatible API
+After=local-fs.target network-online.target
+Wants=network-online.target
+
+[Container]
+Image=quay.io/ramalama/ramalama:latest
+ContainerName=granite
+PublishPort=8000:8000
+# CPU-only: do not require GPU devices. Optional DRI devices are fine if present.
+AddDevice=-/dev/dri
+# REPLACE the host src= path with the real GGUF from `ramalama pull`
+Mount=type=bind,src=/REPLACE/WITH/PATH/TO/granite-4.1-8b-Q4_1.gguf,destination=/mnt/models/model.file,ro,Z
+# llama-server OpenAI-compatible routes live under /v1
+Exec=llama-server --host 0.0.0.0 --port 8000 -m /mnt/models/model.file
+# Keep enough RAM headroom on the host (~8–12 GiB free recommended)
+PodmanArgs=--memory=12g
+Pull=missing
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=900
+
+[Install]
+WantedBy=default.target multi-user.target
