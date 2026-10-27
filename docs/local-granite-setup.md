@@ -119,10 +119,24 @@ Override defaults with env vars if needed: `NAME`, `PORT`, `IMAGE`, `MODEL`,
 Ops after install:
 
 ```
-systemctl --user status granite
-systemctl --user restart granite
-journalctl --user -u granite.service -f
-podman logs -f granite
+loginctl show-user "$USER" -p Linger   # expect Linger=yes
+grep -A2 '^\[Install\]' ~/.config/containers/systemd/granite.container
+systemctl --user daemon-reload
+systemctl --user start granite.service
+systemctl --user status granite.service --no-pager -l
+podman ps --filter name=granite
+curl -s http://127.0.0.1:8000/v1/models
+```
+
+Skip `systemctl --user enable granite` — that error is expected. With linger plus
+`[Install] WantedBy=default.target` in the `.container` file, the unit comes up
+after reboot.
+
+If start fails:
+
+```
+journalctl --user -u granite.service -b --no-pager -l
+cat ~/.config/containers/systemd/granite.container
 ```
 
 ## Notes ##

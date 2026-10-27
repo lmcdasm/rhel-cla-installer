@@ -47,22 +47,24 @@ if [[ ! -f "${QUADLET_DIR}/${UNIT}" ]]; then
 fi
 
 echo "==> Enabling lingering so user Quadlets survive logout/reboot"
-loginctl enable-linger "$(id -un)" 2>/dev/null || \
-  echo "WARN: could not enable linger (need root once: sudo loginctl enable-linger $(id -un))"
+# Generated Quadlets are pulled in via [Install] WantedBy=default.target; do not
+# systemctl --user enable (that fails on these units). Linger + start is enough.
+sudo loginctl enable-linger "$(id -un)" || true
+loginctl show-user "$(id -un)" -p Linger || true
 
 echo "==> Reloading and starting user service: ${NAME}.service"
 systemctl --user daemon-reload
-systemctl --user enable --now "${NAME}.service"
+systemctl --user start "${NAME}.service"
 
 echo "==> Status"
-systemctl --user --no-pager status "${NAME}.service" || true
+systemctl --user --no-pager -l status "${NAME}.service" || true
 podman ps --filter "name=${NAME}"
 
 echo
 echo "==> Smoke test"
 sleep 2
 curl -sf "http://127.0.0.1:${PORT}/v1/models" | (command -v jq >/dev/null && jq . || cat) || \
-  echo "WARN: /v1/models not ready yet — check: journalctl --user -u ${NAME}.service -f"
+  echo "WARN: /v1/models not ready yet — check: journalctl --user -u ${NAME}.service -b --no-pager -l"
 
 echo
 echo "Done. Inventory tip:"
@@ -70,7 +72,9 @@ echo "  base_url: http://127.0.0.1:${PORT}/v1"
 echo "  default_model: use the id from /v1/models (often granite-4.1-8b-Q4_1)"
 echo
 echo "Ops:"
-echo "  systemctl --user status ${NAME}"
-echo "  systemctl --user restart ${NAME}"
-echo "  journalctl --user -u ${NAME}.service -f"
+echo "  loginctl show-user \"\$USER\" -p Linger   # expect Linger=yes"
+echo "  systemctl --user status ${NAME}.service --no-pager -l"
+echo "  systemctl --user restart ${NAME}.service"
+echo "  journalctl --user -u ${NAME}.service -b --no-pager -l"
 echo "  podman logs -f ${NAME}"
+echo "  # Skip: systemctl --user enable ${NAME}  (expected to fail on generated Quadlets)"
