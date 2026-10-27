@@ -5,6 +5,8 @@ namespace: rhel-cla-system
 
 resources:
   - namespace.yaml
+  - resource-quota.yaml
+  - networkpolicy.yaml
   - okp-sa.yaml
   - okp-pvc.yaml
   - okp-deployment.yaml
@@ -16,6 +18,7 @@ resources:
   - lightspeed-deployment.yaml
   - lightspeed-service.yaml
   - lightspeed-route.yaml
+  - granite-connectivity-job.yaml
 
 configMapGenerator:
   - name: lightspeed-stack-config

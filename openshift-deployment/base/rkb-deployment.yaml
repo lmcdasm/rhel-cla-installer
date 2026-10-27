@@ -22,7 +22,8 @@ spec:
       serviceAccountName: rhel-knowledge-bridge
       containers:
         - name: rhel-knowledge-bridge
-          image: registry.redhat.io/rhel-cla/rhel-knowledge-bridge-rhel10:v1.0.2-1785450151
+          # Tag v1.0.2-1785450151 pinned by digest from lab host podman inspect
+          image: registry.redhat.io/rhel-cla/rhel-knowledge-bridge-rhel10@sha256:2eb8f92f7f093a419e8f01bcb42e7d61729d0177c54f95dd162bd8bc56f36e48
           imagePullPolicy: IfNotPresent
           ports:
             - name: mcp

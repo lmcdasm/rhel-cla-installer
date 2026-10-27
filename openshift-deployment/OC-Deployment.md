@@ -83,13 +83,21 @@ flowchart LR
 
 ---
 
-## Images (pinned to lab host)
+## Images (pinned to lab host digests)
 
-| Component | Image |
-| --- | --- |
-| OKP | `registry.redhat.io/offline-knowledge-portal/rhokp-rhel9:1.2.9-1784730494` |
-| Knowledge bridge | `registry.redhat.io/rhel-cla/rhel-knowledge-bridge-rhel10:v1.0.2-1785450151` |
-| Lightspeed stack | `registry.redhat.io/lightspeed-core/lightspeed-stack-rhel9:0.6.4` |
+Digests taken from `podman image inspect` on `10.20.1.200` for the running Quadlet tags:
+
+| Component | Tag (reference) | Digest-pinned image |
+| --- | --- | --- |
+| OKP | `…/rhokp-rhel9:1.2.9-1784730494` | `…/rhokp-rhel9@sha256:7f4764ba3c76f1f4b062cbc7847e1eb5a06064c172030f2c9ff3e729ac637b8c` |
+| Knowledge bridge | `…/rhel-knowledge-bridge-rhel10:v1.0.2-1785450151` | `…/rhel-knowledge-bridge-rhel10@sha256:2eb8f92f7f093a419e8f01bcb42e7d61729d0177c54f95dd162bd8bc56f36e48` |
+| Lightspeed stack | `…/lightspeed-stack-rhel9:0.6.4` | `…/lightspeed-stack-rhel9@sha256:4094c9b5601983497b2dac5f0e6b3e1cb8e6094eaab30f05d0a7a535a49c179c` |
+
+Also applied for lab hardening:
+
+- **NetworkPolicy** — default deny; allow DNS, same-namespace, router→Lightspeed, Lightspeed→Granite `:8000`, kubelet probes
+- **ResourceQuota / LimitRange** — namespace caps and container defaults
+- **Job `granite-connectivity`** — in-cluster curl to `http://10.20.1.200:8000/v1/models`
 
 ---
 

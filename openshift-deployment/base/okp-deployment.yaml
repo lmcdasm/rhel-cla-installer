@@ -25,7 +25,8 @@ spec:
       serviceAccountName: rh-offline-knowledge-portal
       containers:
         - name: rh-offline-knowledge-portal
-          image: registry.redhat.io/offline-knowledge-portal/rhokp-rhel9:1.2.9-1784730494
+          # Tag 1.2.9-1784730494 pinned by digest from lab host podman inspect
+          image: registry.redhat.io/offline-knowledge-portal/rhokp-rhel9@sha256:7f4764ba3c76f1f4b062cbc7847e1eb5a06064c172030f2c9ff3e729ac637b8c
           imagePullPolicy: IfNotPresent
           ports:
             - name: solr

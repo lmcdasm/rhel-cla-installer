@@ -1,0 +1,142 @@
+# Lab NetworkPolicies for rhel-cla-system.
+# Default deny, then allow DNS, in-namespace CLA traffic, router ingress to
+# Lightspeed, and egress to lab Granite (10.20.1.200:8000).
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: rhel-cla-system
+  labels:
+    app.kubernetes.io/part-of: rhel-cla
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: rhel-cla-system
+  labels:
+    app.kubernetes.io/part-of: rhel-cla
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    # Allow DNS to cluster DNS (any dest on 53) — label selectors vary by OCP version.
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-same-namespace
+  namespace: rhel-cla-system
+  labels:
+    app.kubernetes.io/part-of: rhel-cla
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector: {}
+  egress:
+    - to:
+        - podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-router-to-lightspeed
+  namespace: rhel-cla-system
+  labels:
+    app.kubernetes.io/part-of: rhel-cla
+spec:
+  podSelector:
+    matchLabels:
+      app: lightspeed-stack
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              network.openshift.io/policy-group: ingress
+      ports:
+        - protocol: TCP
+          port: 8081
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-lab-granite
+  namespace: rhel-cla-system
+  labels:
+    app.kubernetes.io/part-of: rhel-cla
+spec:
+  podSelector:
+    matchLabels:
+      app: lightspeed-stack
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 10.20.1.200/32
+      ports:
+        - protocol: TCP
+          port: 8000
+---
+# Allow kubelet HTTP probes (node -> pod) for Lightspeed liveness/readiness.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-kubelet-probes-lightspeed
+  namespace: rhel-cla-system
+  labels:
+    app.kubernetes.io/part-of: rhel-cla
+spec:
+  podSelector:
+    matchLabels:
+      app: lightspeed-stack
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8081
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-kubelet-probes-okp-rkb
+  namespace: rhel-cla-system
+  labels:
+    app.kubernetes.io/part-of: rhel-cla
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - rh-offline-knowledge-portal
+          - rhel-knowledge-bridge
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8983
+        - protocol: TCP
+          port: 8192
+        - protocol: TCP
+          port: 8080
