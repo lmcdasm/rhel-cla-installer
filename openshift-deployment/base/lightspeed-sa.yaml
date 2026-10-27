@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: lightspeed-stack
+  namespace: rhel-cla-system
+  labels:
+    app: lightspeed-stack
+    app.kubernetes.io/part-of: rhel-cla
+imagePullSecrets:
+  - name: redhat-pull-secret

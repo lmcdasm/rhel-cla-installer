@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rhel-knowledge-bridge
+  namespace: rhel-cla-system
+  labels:
+    app: rhel-knowledge-bridge
+    app.kubernetes.io/part-of: rhel-cla
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: rhel-knowledge-bridge
+  template:
+    metadata:
+      labels:
+        app: rhel-knowledge-bridge
+        app.kubernetes.io/part-of: rhel-cla
+    spec:
+      serviceAccountName: rhel-knowledge-bridge
+      containers:
+        - name: rhel-knowledge-bridge
+          image: registry.redhat.io/rhel-cla/rhel-knowledge-bridge-rhel10:v1.0.2-1785450151
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: mcp
+              containerPort: 8192
+              protocol: TCP
+          env:
+            - name: MCP_TRANSPORT
+              value: streamable-http
+            - name: MCP_PORT
+              value: "8192"
+            - name: MCP_LOG_LEVEL
+              value: INFO
+            - name: MCP_SOLR_URL
+              value: http://rh-offline-knowledge-portal:8983
+            - name: MCP_EXCLUDE_KBASE
+              value: "true"
+          livenessProbe:
+            tcpSocket:
+              port: mcp
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: mcp
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi

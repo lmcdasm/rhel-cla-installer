@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rh-offline-knowledge-portal
+  namespace: rhel-cla-system
+  labels:
+    app: rh-offline-knowledge-portal
+    app.kubernetes.io/part-of: rhel-cla
+imagePullSecrets:
+  - name: redhat-pull-secret

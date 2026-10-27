@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rh-offline-knowledge-portal
+  namespace: rhel-cla-system
+  labels:
+    app: rh-offline-knowledge-portal
+    app.kubernetes.io/part-of: rhel-cla
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: rh-offline-knowledge-portal
+  template:
+    metadata:
+      labels:
+        app: rh-offline-knowledge-portal
+        app.kubernetes.io/part-of: rhel-cla
+    spec:
+      serviceAccountName: rh-offline-knowledge-portal
+      containers:
+        - name: rh-offline-knowledge-portal
+          image: registry.redhat.io/offline-knowledge-portal/rhokp-rhel9:1.2.9-1784730494
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: solr
+              containerPort: 8983
+              protocol: TCP
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: okp-access-key
+                  key: ACCESS_KEY
+            - name: SOLR_HOST_BIND
+              value: "0.0.0.0"
+            - name: SOLR_LOG_LEVEL
+              value: INFO
+          volumeMounts:
+            - name: solr-data
+              mountPath: /opt/solr/server/solr/portal/data
+          startupProbe:
+            tcpSocket:
+              port: solr
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 36
+          livenessProbe:
+            tcpSocket:
+              port: solr
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: solr
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "1"
+              memory: 2Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+      volumes:
+        - name: solr-data
+          emptyDir: {}
