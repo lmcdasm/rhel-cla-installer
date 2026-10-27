@@ -1,6 +1,12 @@
 # Red Hat Enterprise Linux Command Line Assistant Installer #
 
-This is the installer for the self-managed RHEL CLA. It supports local, remote installations. OpenShift support is stil in development.
+This is the installer for the self-managed RHEL CLA. It supports local and remote installations. OpenShift support is still in development.
+
+# Getting Started #
+
+Follow these instructions to get started using the RHEL CLA installer.
+
+See the [contributing] docs for information on project development and maintenance.
 
 ## Prerequisites ##
 
@@ -10,7 +16,7 @@ This is the installer for the self-managed RHEL CLA. It supports local, remote i
 - A [Red Hat Offline Knowledge Portal key][rhokp_key]
 - 30GB of free disk space for the Red Hat Offline Knowledge Portal.
 - Valid container registry login credentials in `/etc/containers/auth.json`.
-- If using a provider that requires a credentials stored in a file, create the secret in `podman`.
+- If using a provider that requires credentials stored in a file, create the secret in `podman`.
 - `sudo` permissions on all systems where RHEL CLA will be installed. This includes when installing locally.
 
 Create the container registry login credentials. This needs to be done on both local and remote systems, or the auth file can be generated once and copied to remote systems.
@@ -22,7 +28,7 @@ sudo podman login --authfile /etc/containers/auth.json registry.redhat.io
 If necessary for your inference provider, create a `podman` secret. See `inventory/hosts.example.yml` for details.
 
 ```
-sudo podman secrete create [secret name] [path to file]
+sudo podman secret create [secret name] [path to file]
 ```
 
 Set the secret name in the inventory variables for our provider.
@@ -118,61 +124,7 @@ This will keep container images on the system by default. To remove container im
     ```
     sudo systemctl restart goose-proxy
     ```
-## Dependency Management
-
-Konflux builds this image [hermetically](https://konflux-ci.dev/docs/building/hermetic-builds/)
-(with no network access in the container build). Every dependency is either
-pinned in the repository or prefetched by the
-[Hermeto](https://hermetoproject.github.io/hermeto/) `prefetch-dependencies`
-task, driven by the `prefetch-input` parameter of
-`.tekton/pipeline-build-multiarch.yaml`. Regenerate the files below whenever
-the matching inputs change, and commit the results.
-
-### Pip dependencies
-
-```
-make pip-deps
-```
-
-Runs `pip-compile` (requires `python3.12` and network access) on each
-`requirements/*.in` file and writes hash-pinned files to `.konflux/pip/`:
-
-* `requirements.in` -> `requirements-3.12.txt`: installer runtime dependencies.
-* `requirements-tools.in` -> `requirements-tools-3.12.txt`: zipapp tooling (`shiv`).
-* `requirements-build.in` / `requirements-build-legacy.in` ->
-  `requirements-build[-legacy]-3.12.txt`: PEP 517 build backends needed to
-  compile sdists from source. They are listed by hand (the comments say which
-  package needs each); the legacy file holds older versions that some sdists cap.
-  If the build fails with `No matching distribution found for <backend><N>`,
-  add that backend or version to the matching `.in` file.
-
-### Artifacts (galaxy collections)
-
-```
-make artifacts-lock
-```
-
-Pins the Ansible collections from `requirements/requirements.yml` into
-`.konflux/artifacts/artifacts.lock.yaml` (requires network access to galaxy.ansible.com).
-
-### RPMs
-
-```
-make rpm-lock
-```
-
-Resolves `.konflux/rpms/rpms.in.yaml` into `.konflux/rpms/rpms.lock.yaml` with
-`rpm-lockfile-prototype` (requires `podman`). Rerun when the base image in the
-`Containerfile` or the input file changes.
-
-### Testing locally
-
-```
-make hermeto-prefetch
-```
-
-Runs the same Hermeto image and input as the pipeline against the pip, RPM and
-artifacts inputs (requires `podman`; output lands in `.hermeto-out/`).
 
 [`podman`]: https://podman.io/
 [rhokp_key]: https://access.redhat.com/offline/access/
+[contributing]: docs/contributing.md
