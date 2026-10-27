@@ -24,7 +24,7 @@ conversation_cache:
   type: noop
 
 inference:
-  default_provider: {{ ls_provider }}
+  default_provider: {{ rhel_cla_provider }}
   default_model: {{ _ls_provider_config.default_model }}
 
 customization:

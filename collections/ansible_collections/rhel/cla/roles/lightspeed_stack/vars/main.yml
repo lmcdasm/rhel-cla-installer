@@ -1,2 +1,2 @@
 _ls_major_version: "{{ '.'.join(ls_container_image_tag.split('.')[:-1]) }}"
-_ls_provider_config: "{{ lookup('vars', 'ls_{0}_config'.format(ls_provider)) }}"
+_ls_provider_config: "{{ lookup('vars', '{0}_config'.format(rhel_cla_provider)) }}"

@@ -5,7 +5,7 @@ ls_config_dir: /var/lib/containers/lightspeed-stack
 ls_config_files:
   - lightspeed-stack-{{ _ls_major_version }}.yml
   - system_prompt.txt
-  - providers/{{ ls_provider }}/llama-stack.yml
+  - providers/{{ rhel_cla_provider }}/llama-stack.yml
 
 ls_host: 0.0.0.0
 ls_port: 8081
@@ -13,19 +13,19 @@ ls_auth_enabled: no
 ls_workers: 1
 ls_deployment_environment: local
 
-ls_provider: ~
+rhel_cla_provider: ~
 
-ls_vertex_config:
+vertex_config:
   default_model: publishers/google/models/gemini-2.5-flash
   credentials_secret_name: ~
   project_id: ~
   location: global
 
-ls_ramalama_config:
+ramalama_config:
   default_model: granite-4.1-8b-Q4_1
   api_key: sk-no-key-required
   base_url: http://127.0.0.1:8000/v1
   model_path: /models/granite-4.1-8b-Q4_1.gguf
 
-ls_openai_config: {}
-ls_rhoai_config: {}
+openai_config: {}
+rhoai_config: {}
