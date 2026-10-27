@@ -19,8 +19,8 @@ providers:
     - provider_id: ramalama
       provider_type: remote::openai
       config:
-        api_key: "sk-no-key-required"
-        base_url: http://127.0.0.1:8000/v1
+        api_key: {{ _ls_provider_config.api_key }}
+        base_url: {{ _ls_provider_config.base_url }}
 
   agents:
     - provider_id: meta-reference
@@ -94,8 +94,8 @@ storage:
       backend: kv_default
 
 models:
-  - model_id: {{ ls_providers.ramalama.model_id }}
-    provider_model_id: {{ ls_providers.ramalama.provider_model_id }}
+  - model_id: {{ _ls_provider_config.default_model }}
+    provider_model_id: {{ _ls_provider_config.model_path }}
     provider_id: ramalama
     model_type: llm
     metadata: {}

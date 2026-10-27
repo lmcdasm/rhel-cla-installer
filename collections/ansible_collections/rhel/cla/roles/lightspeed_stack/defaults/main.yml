@@ -14,17 +14,18 @@ ls_workers: 1
 ls_deployment_environment: local
 
 ls_provider: ~
-ls_default_model: ~
 
-ls_providers:
-  vertex:
-    credentials_secret_name: ~
-    project_id: ~
-    location: global
+ls_vertex_config:
+  default_model: publishers/google/models/gemini-2.5-flash
+  credentials_secret_name: ~
+  project_id: ~
+  location: global
 
-  ramalama:
-    model_id: /models/granite-4.1-8b-Q4_1.gguf
-    provider_model_id: /models/granite-4.1-8b-Q4_1.gguf
+ls_ramalama_config:
+  default_model: granite-4.1-8b-Q4_1
+  api_key: sk-no-key-required
+  base_url: http://127.0.0.1:8000/v1
+  model_path: /models/granite-4.1-8b-Q4_1.gguf
 
-  openai: {}
-  rhoai: {}
+ls_openai_config: {}
+ls_rhoai_config: {}

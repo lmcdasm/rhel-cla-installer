@@ -25,7 +25,7 @@ conversation_cache:
 
 inference:
   default_provider: {{ ls_provider }}
-  default_model: {{ ls_default_model }}
+  default_model: {{ _ls_provider_config.default_model }}
 
 customization:
   system_prompt_path: /app-root/system_prompt.txt

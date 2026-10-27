@@ -19,8 +19,8 @@ providers:
     - provider_id: vertex
       provider_type: remote::vertexai
       config:
-        project: {{ ls_providers.vertex.project_id }}
-        location: {{ ls_providers.vertex.location }}
+        project: {{ _ls_provider_config['project_id'] }}
+        location: {{ _ls_provider_config['location'] }}
 
   agents:
     - provider_id: meta-reference

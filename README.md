@@ -19,7 +19,7 @@ Create the container registry login credentials. This needs to be done on both l
 sudo podman login --authfile /etc/containers/auth.json registry.redhat.io
 ```
 
-If necessary for your inference provider, create a `podman` secret.
+If necessary for your inference provider, create a `podman` secret. See `inventory/hosts.example.yml` for details.
 
 ```
 sudo podman secrete create [secret name] [path to file]
@@ -27,11 +27,11 @@ sudo podman secrete create [secret name] [path to file]
 
 Set the secret name in the inventory variables for our provider.
 ```yaml
-ls_providers:
-  vertex:
-    credentials_secret_name: secret_name
-    project_id: my_project
-    location: global
+ls_vertex_config:
+  default_model: publishers/google/models/gemini-2.5-flash
+  credentials_secret_name: secret_name
+  project_id: my_project
+  location: global
 ```
 
 

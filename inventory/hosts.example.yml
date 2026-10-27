@@ -1,7 +1,23 @@
 all:
   hosts:
 
+  # All values of ~ are required to be set.
   vars:
     okp_access_key: ~
     ls_provider: ~
     ls_default_model: ~
+
+    ## Provider specific configuration.
+    ## The configuration used is based on the value of ls_provider: ls_[ls_provider]_config.
+    #
+    # ls_vertex_config:
+    #   default_model: gemini-2.5-pro
+    #   credentials_secret_name: ~
+    #   project_id: ~
+    #   location: global
+    #
+    # ls_ramalama_config:
+    #   default_model: granite-4.1-8b-Q4_1
+    #   api_key: sk-no-key-required
+    #   base_url: http://127.0.0.1:8000/v1
+    #   model_path: /models/granite-4.1-8b-Q4_1.gguf
