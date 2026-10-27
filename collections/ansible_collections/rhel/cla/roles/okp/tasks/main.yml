@@ -1,9 +1,11 @@
 - name: Copy unit files
   template:
-    src: "{{ item }}"
-    dest: /etc/containers/systemd/{{ item | basename | replace ('.j2', '' ) | replace('okp', okp_name) }}
+    src: "{{ item.name | default(item) }}"
+    dest: /etc/containers/systemd/{{ item.name | default(item) | basename | replace ('.j2', '' ) | replace('okp', okp_name) }}
+    mode: "{{ item.mode | default(omit) }}"
   loop:
-    - units/okp.container.j2
+    - name: units/okp.container.j2
+      mode: '0600'
     - units/okp.image.j2
   notify: init
   tags:

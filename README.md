@@ -10,8 +10,9 @@ See the [contributing] docs for information on project development and maintenan
 
 ## Prerequisites ##
 
+- RHEL 9.5 or later
 - Python 3.11 or later
-- [`podman`]
+- [`podman`] 5 or later
 - `tar`
 - A [Red Hat Offline Knowledge Portal key][rhokp_key]
 - 30GB of free disk space for the Red Hat Offline Knowledge Portal.
@@ -33,7 +34,7 @@ sudo podman secret create [secret name] [path to file]
 
 Set the secret name in the inventory variables for our provider.
 ```yaml
-ls_vertex_config:
+vertex_config:
   default_model: publishers/google/models/gemini-2.5-flash
   credentials_secret_name: secret_name
   project_id: my_project

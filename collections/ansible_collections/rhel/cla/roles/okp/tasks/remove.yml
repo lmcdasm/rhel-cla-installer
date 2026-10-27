@@ -26,4 +26,4 @@
   failed_when: no
   when: remove_images is defined
   tags:
-    - rkb
+    - okp
