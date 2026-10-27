@@ -117,13 +117,14 @@ openshift-deployment/
 Prereqs: `oc` logged into `2026-prod-1` as a user that can create projects/secrets/deployments/routes.
 
 ```bash
-# 1) Expose lab Granite on the LAN (one-time / when rebound to loopback)
-RHEL_PASS=... ./openshift-deployment/scripts/expose-lab-granite.sh
+# 0) Lab Granite must already listen on 0.0.0.0:8000 (current rhel-1-vm state).
+#    Only if it is bound to 127.0.0.1 again:
+#    RHEL_PASS=... ./openshift-deployment/scripts/expose-lab-granite.sh
 
-# 2) Seed secrets from the RHEL host inventory + auth.json
+# 1) Seed secrets from the RHEL host inventory + auth.json
 RHEL_PASS=... ./openshift-deployment/scripts/seed-secrets-from-rhel.sh
 
-# 3) Apply manifests
+# 2) Apply manifests (OKP image pull can take 10–30+ minutes)
 ./openshift-deployment/scripts/apply.sh
 ```
 
