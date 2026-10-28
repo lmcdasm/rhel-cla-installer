@@ -264,20 +264,114 @@ This will keep container images on the system by default. To remove container im
 
 ### Client Configurations ###
 
-#### Goose (goose-redhat)
+After the local stack is up you can talk to it with more than one client. Both
+talk to the same CLA / Lightspeed API (`:8080`); they differ in how capable the
+front-end is.
 
+| Client | Package | What it does |
+| --- | --- | --- |
+| `c` | `command-line-assistant` | Simple ask/answer in the terminal (read-only Q&A) |
+| `goose` | `goose-redhat` | Fuller agent client: multi-step sessions, tool calls (with approval), optional MCP extensions |
 
-1. Add the following to the `[backend]` section of `/etc/xdg/goose-proxy/config.toml`:
+Short version: `c` is the lightweight CLA client; `goose` is the agentic CLA
+client. See also the [goose intro blog][goose_blog] and
+[Optimize CLA tasks with goose-redhat][goose_kcs].
 
-    ```toml
-    endpoint = "http://127.0.0.1:8080/v1"
-    ```
+#### Goose (goose-redhat) ####
 
-1. Restart the proxy.
+`goose-proxy` sits between Goose and your CLA API (Goose’s OpenAI-style chat API
+↔ Lightspeed Responses API). Out of the box it points at Red Hat’s hosted
+service; for this installer you point it at the local stack instead.
 
-    ```
-    sudo systemctl restart goose-proxy
-    ```
+**Install** (RHEL 9.8+ / 10.2+, Extensions repo):
+
+```
+sudo subscription-manager repos --enable=rhel-$(rpm -E %rhel)-for-$(arch)-extensions-rpms
+sudo dnf install -y goose-redhat
+```
+
+Open a **new shell** so `/etc/profile.d/goose-init.sh` can seed
+`~/.config/goose` (provider `rhel_cla`).
+
+**Point goose-proxy at local CLA** — edit `/etc/xdg/goose-proxy/config.toml`.
+Set **`endpoint`** (the Lightspeed base URL). Do **not** put the CLA URL in
+`proxy`; that key is an HTTP *forward* proxy only and will produce
+`Tunnel connection failed: 404` / `502` if misused.
+
+```toml
+[backend]
+endpoint = "http://127.0.0.1:8080/v1"
+# Leave empty for local CLA (forward proxy only — not the CLA URL)
+proxy = ""
+# Raise for local CPU Granite (see note below)
+timeout = 1800
+```
+
+```
+sudo systemctl restart goose-proxy
+```
+
+**Try it:**
+
+```
+goose run -t "how do I check firewalld status?"
+goose   # interactive session
+```
+
+#### Local Granite workarounds (required today) ####
+
+When Lightspeed runs in the installer pod/quadlet and Granite runs as a separate
+host service (this repo’s [local Granite][local_granite] path), a few
+Ansible-rendered values under `/var/lib/containers/lightspeed-stack/` often need
+hand-fixes before `c` / `goose` can infer. Treat these as **workarounds** until
+the installer wires them correctly; a reinstall can overwrite the YAML.
+
+1. **Granite must be reachable from inside the Lightspeed container**
+
+   In `llama-stack.yml`, the ramalama provider `base_url` must not be
+   `http://127.0.0.1/v1` (that is loopback *inside* the container). Point it at
+   the host Granite port, for example:
+
+   ```yaml
+   base_url: http://<host-ip>:8000/v1
+   ```
+
+   Also set `provider_model_id` to whatever RamaLama actually advertises
+   (`curl -s http://127.0.0.1:8000/v1/models`), e.g.
+   `ibm-granite/granite-4.1-8b-GGUF` — not a stale `/models/….gguf` path.
+
+2. **`default_model` must be the provider resource id (no `ramalama/` prefix)**
+
+   `goose-proxy` sends an empty `model` and Lightspeed falls back to
+   `inference.default_model` in `lightspeed-stack.yml`. Use the provider id,
+   not the `/v1/models` list identifier:
+
+   ```yaml
+   # works with goose-proxy (empty model → default)
+   default_model: "ibm-granite/granite-4.1-8b-GGUF"
+
+   # fails with: Model with ID ramalama/ibm-granite/... does not exist
+   # default_model: "ramalama/ibm-granite/granite-4.1-8b-GGUF"
+   ```
+
+3. **Restart Lightspeed after editing**
+
+   ```
+   sudo systemctl restart lightspeed-stack
+   curl -sS http://127.0.0.1:8080/v1/models
+   ```
+
+#### CPU Granite / goose streaming timeouts ####
+
+Local Granite on CPU can take many minutes between streamed tokens. If
+`goose-proxy`’s backend `timeout` is too low (default `30`, even `300` can be
+short), the proxy drops the SSE mid-stream and Goose reports something like
+`Stream decode error: error decoding response body` even though Lightspeed
+logged `200`.
+
+Raise `timeout` under `[backend]` in `/etc/xdg/goose-proxy/config.toml` (for
+example `1800`), restart `goose-proxy`, and retry. First answers on CPU are
+slow; that is expected.
 
 [`podman`]: https://podman.io/
 [rhokp_key]: https://access.redhat.com/offline/access/
@@ -291,3 +385,5 @@ This will keep container images on the system by default. To remove container im
 [rhokp_docs]: https://docs.redhat.com/en/documentation/red_hat_offline_knowledge_portal/1/install-proc_launching_rhokp
 [cla_offline_blog]: https://www.redhat.com/en/blog/use-rhel-command-line-assistant-offline-new-developer-preview
 [cla_installer_catalog]: https://catalog.redhat.com/en/software/containers/rhel-cla/installer-rhel10/68af1cbe4a00895806fa0b48
+[goose_blog]: https://www.redhat.com/en/blog/supercharge-rhel-troubleshooting-agentic-ai-introducing-goose
+[goose_kcs]: https://access.redhat.com/articles/7142302
