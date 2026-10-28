@@ -1,130 +1,69 @@
-# RHEL CLA on OpenShift — Ansible k8s path
+# RHEL CLA on OpenShift — Ansible notes
 
-OpenShift deploy for the CLA stack (**OKP + RHEL Knowledge Bridge + Lightspeed**)
-reuses the collection’s Kubernetes templates and playbook. Lab Granite stays
-out of cluster (**option B**: `http://10.20.1.200:8000/v1`).
+OpenShift deploy uses the **same collection interface** as local install:
+Jinja templates in each role’s `templates/k8s/`, applied by the
+`rhel.cla.k8s` playbook. Do not maintain a parallel static manifest tree.
 
-Branch: `dasm-ocp-deployment`  
-Cluster: `2026-prod-1`  
-Namespace: `rhel-cla-system` (see [`lab-vars.yml`](lab-vars.yml))
+```bash
+# Preferred (self-contained installer)
+./rhel-cla-installer rhel.cla.k8s -e @examples/openshift-lab-vars.yml
 
----
+# Equivalent
+ansible-playbook -i localhost, -c local \
+  collections/ansible_collections/rhel/cla/playbooks/k8s.yml \
+  -e @examples/openshift-lab-vars.yml
+```
 
-## Source of truth
+Preview: add `--check --diff`. Remove: `rhel.cla.k8s_uninstall` with the same
+vars file.
 
-| Piece | Location |
-| --- | --- |
-| Playbook | [`collections/.../playbooks/k8s.yml`](../collections/ansible_collections/rhel/cla/playbooks/k8s.yml) |
-| Shared NS / NetPol / Quota / Granite Job | role `rhel.cla.cla_k8s` → `templates/k8s/` |
-| OKP / RKB / Lightspeed | roles `okp`, `rhel_knowledge_bridge`, `lightspeed_stack` → `tasks/k8s.yml` + `templates/k8s/*.j2` |
-| Lab values (digests, PVC, ramalama URL) | [`lab-vars.yml`](lab-vars.yml) |
-| Secrets | [`scripts/seed-secrets-from-rhel.sh`](scripts/seed-secrets-from-rhel.sh) (never committed) |
-
-Do **not** hand-maintain parallel Deployment/Service YAML under this directory.
-Change behavior in the role Jinja templates so Quadlet-adjacent and cluster
-paths stay aligned.
+See [`collections/ansible_collections/rhel/cla/README.md`](../collections/ansible_collections/rhel/cla/README.md)
+for variable flags (`cla_namespace`, `okp_use_pvc`, `rhel_cla_provider`, …).
 
 ```mermaid
 flowchart LR
-  labVars[lab_vars.yml]
-  play[playbooks_k8s.yml]
-  roles[cla_k8s_okp_rkb_ls_j2]
-  cluster[OCP_rhel_cla_system]
-  labVars --> play
-  roles --> play
-  play -->|kubernetes.core.k8s| cluster
+  installer[rhel_cla_installer_or_ansible_playbook]
+  play[rhel_cla_k8s]
+  roles[role_tasks_k8s_j2]
+  cluster[OpenShift]
+  installer --> play --> roles --> cluster
 ```
 
-### Feature flags (defaults in `cla_k8s` / role defaults)
+## Lab profile (optional)
 
-| Variable | Lab (`lab-vars.yml`) | Purpose |
-| --- | --- | --- |
-| `cla_create_namespace` | `true` | Create project/namespace |
-| `cla_network_policies` | `true` | Default-deny + DNS / in-NS / router / Granite egress / probes |
-| `cla_resource_quota` | `true` | ResourceQuota + LimitRange |
-| `okp_use_pvc` | `true` | OKP Solr data on PVC (else emptyDir) |
-| `ls_create_route` | `true` | OpenShift Route for Lightspeed |
-| `cla_granite_connectivity_job` | `true` | One-shot Job + egress policy to lab Granite |
-| `cla_pull_secret_name` | `redhat-pull-secret` | Wire `imagePullSecrets` on workload SAs |
-| `*_container_image_digest` | set | Pin images by digest when non-empty |
+[`examples/openshift-lab-vars.yml`](../examples/openshift-lab-vars.yml) pins
+digests and points Lightspeed at external lab Granite
+(`http://10.20.1.200:8000/v1`). Adjust for your cluster / provider.
 
----
+**Prerequisites (not done by the playbook):**
 
-## Lab apply
+1. `oc` logged into the cluster; `kubernetes.core` available to Ansible
+2. Namespace pull secret + OKP access key Secret present
 
-Prerequisites: `oc` logged into the cluster, `ansible-playbook`, collection
-`kubernetes.core`, and network reachability from cluster nodes to
-`10.20.1.200:8000`.
+Optional lab-only helpers in this directory (convenience — **not** the install
+interface):
 
-```bash
-# 0) Optional: dump manifests (gitignored generated/) and/or dry-run
-make -C openshift-deployment render
-make -C openshift-deployment check
+| Helper | Purpose |
+| --- | --- |
+| [`scripts/seed-secrets-from-rhel.sh`](scripts/seed-secrets-from-rhel.sh) | Copy registry auth + OKP key from a Quadlet host into the namespace |
+| [`scripts/verify.sh`](scripts/verify.sh) | Quick `oc` / curl checks after apply |
+| [`scripts/expose-lab-granite.sh`](scripts/expose-lab-granite.sh) | Lab firewall / PublishPort for host Granite |
+| [`examples/command-line-assistant.config.toml.example`](examples/command-line-assistant.config.toml.example) | Point `c` / clad at the Lightspeed Route |
 
-# 1) Secrets (pull + OKP access key) from the RHEL Quadlet host
-RHEL_PASS=… make -C openshift-deployment seed
+## OKP on OpenShift (in role templates)
 
-# 2) Apply via Ansible k8s roles
-make -C openshift-deployment apply
-
-# 3) Verify
-make -C openshift-deployment verify
-make -C openshift-deployment granite-check   # optional Job re-run
-```
-
-Equivalent playbook invocation:
-
-```bash
-cd /path/to/rhel-cla-installer
-ansible-playbook -i localhost, -c local \
-  collections/ansible_collections/rhel/cla/playbooks/k8s.yml \
-  -e @openshift-deployment/lab-vars.yml
-```
-
-### OKP on OpenShift (encoded in `okp` k8s templates)
-
-| Requirement | Manifest behavior |
+| Requirement | Behavior in `okp` k8s templates |
 | --- | --- |
 | Single pod / RWO | `strategy: Recreate` |
-| Long first boot | `startupProbe` ~45m; `progressDeadlineSeconds: 3600` |
-| Restricted SCC unpack | ConfigMap `*-tar-wrapper` mounted at `/usr/local/bin/tar` + PATH including `/usr/sbin` |
+| Long first boot | Long `startupProbe`; `progressDeadlineSeconds: 3600` |
+| Restricted SCC unpack | Tar-wrapper ConfigMap + PATH |
 | Durable index | PVC when `okp_use_pvc: true` |
-
----
-
-## Layout (this directory)
-
-```
-openshift-deployment/
-  OC-Deployment.md          # this file
-  lab-vars.yml              # OCP lab extras for the playbook
-  Makefile                  # seed / apply / verify / granite-check
-  examples/
-    command-line-assistant.config.toml.example
-  scripts/
-    seed-secrets-from-rhel.sh
-    apply.sh                # wraps ansible-playbook k8s.yml
-    verify.sh
-    expose-lab-granite.sh
-```
-
----
-
-## What we are not doing here
-
-- Not modifying the local Granite Quadlet docs (PR #61).
-- Not installing RHOAI / in-cluster model serving yet (change
-  `ramalama_config.base_url` in `lab-vars.yml` when ready).
-- Not committing secrets or registry `auth.json`.
-
----
 
 ## Troubleshooting
 
 | Symptom | Likely cause | What to do |
 | --- | --- | --- |
-| `ErrImagePull` | Missing `redhat-pull-secret` | Re-run `seed` |
-| OKP `ERR_013` / tar mode errors | Tar-wrapper CM not applied | Ensure OKP k8s tasks ran; bump `configmap-hash` in `okp-deployment.j2` after wrapper edits |
-| Two OKP pods / volume attach errors | RollingUpdate | Templates must use `Recreate` |
-| Lightspeed up, chat fails | Cluster cannot reach Granite | `make granite-check`; firewalld on `10.20.1.200` |
-| goose / empty model 404 | Wrong `default_model` | Use provider id without `ramalama/` prefix (see `lab-vars.yml`) |
+| `ErrImagePull` | Missing pull secret | Seed or create `redhat-pull-secret`; set `cla_pull_secret_name` |
+| DNS / MCP timeouts in-cluster | NetworkPolicy blocking DNS | Ensure `cla_network_policies` templates include DNS egress |
+| Route chat 504 ~300s | Edge proxy idle timeout | Use port-forward for long lab CPU replies, or raise edge timeout |
+| Granite unreachable | Host firewall on `:8000` | Open port or run `expose-lab-granite.sh` |

@@ -1,9 +1,10 @@
 ---
-# Deploy RHEL CLA to Kubernetes / OpenShift using role k8s templates.
-# Lab example:
-#   ansible-playbook -i localhost, \
+# Deploy RHEL CLA to Kubernetes / OpenShift using role k8s Jinja templates.
+# Primary interfaces (same pattern as rhel.cla.local):
+#   ./rhel-cla-installer rhel.cla.k8s -e @examples/openshift-lab-vars.yml
+#   ansible-playbook -i localhost, -c local \
 #     collections/ansible_collections/rhel/cla/playbooks/k8s.yml \
-#     -e @openshift-deployment/lab-vars.yml
+#     -e @examples/openshift-lab-vars.yml
 - name: Setup RHEL CLA in K8S
   hosts: localhost
   gather_facts: false

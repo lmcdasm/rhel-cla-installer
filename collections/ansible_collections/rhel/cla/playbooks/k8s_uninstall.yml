@@ -1,17 +1,38 @@
-- name: Setup RHEL CLA in K8S
+---
+# Remove RHEL CLA from Kubernetes / OpenShift (role k8s templates, state=absent).
+#   ./rhel-cla-installer rhel.cla.k8s_uninstall -e @examples/openshift-lab-vars.yml
+#   ansible-playbook -i localhost, -c local \
+#     collections/ansible_collections/rhel/cla/playbooks/k8s_uninstall.yml \
+#     -e @examples/openshift-lab-vars.yml
+- name: Remove RHEL CLA from K8S
   hosts: localhost
-  gather_facts: no
-  become: no
+  gather_facts: false
+  become: false
+  collections:
+    - kubernetes.core
+  vars:
+    cla_state: absent
+    okp_state: absent
+    rkb_state: absent
+    ls_state: absent
 
   tasks:
-    - import_role:
-        name: rhel.cla.okp
+    - name: Lightspeed Stack
+      ansible.builtin.import_role:
+        name: rhel.cla.lightspeed_stack
         tasks_from: k8s
 
-    - import_role:
+    - name: RHEL Knowledge Bridge
+      ansible.builtin.import_role:
         name: rhel.cla.rhel_knowledge_bridge
         tasks_from: k8s
 
-    - import_role:
-        name: rhel.cla.lightspeed_stack
+    - name: Offline Knowledge Portal
+      ansible.builtin.import_role:
+        name: rhel.cla.okp
+        tasks_from: k8s
+
+    - name: Shared namespace / NetPol / quota / optional Granite Job
+      ansible.builtin.import_role:
+        name: rhel.cla.cla_k8s
         tasks_from: k8s

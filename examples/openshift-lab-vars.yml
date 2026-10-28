@@ -1,6 +1,9 @@
 ---
-# Lab OpenShift vars for playbooks/k8s.yml (2026-prod-1 / option B Granite).
-# Secrets are NOT here — seed with scripts/seed-secrets-from-rhel.sh first.
+# Example extra vars for rhel.cla.k8s (lab OpenShift / option B Granite).
+# Usage:
+#   ./rhel-cla-installer rhel.cla.k8s -e @examples/openshift-lab-vars.yml
+# Secrets are NOT here — create pull + OKP secrets in the namespace first
+# (optional lab helper: openshift-deployment/scripts/seed-secrets-from-rhel.sh).
 
 cla_namespace: rhel-cla-system
 cla_create_namespace: true

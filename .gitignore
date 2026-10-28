@@ -5,9 +5,6 @@ __pycache__/
 .venvs/
 .hermeto-out/
 
-# Ansible-rendered OpenShift manifests (review aid; never hand-edit)
-/openshift-deployment/generated/
-
 
 /local
 /roles/

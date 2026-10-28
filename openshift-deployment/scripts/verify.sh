@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Post-apply checks for the Ansible k8s lab deploy on the current oc context.
+# Optional lab helper: post-apply oc/curl checks on the current context.
+# Install/apply via: ./rhel-cla-installer rhel.cla.k8s -e @examples/openshift-lab-vars.yml
 set -euo pipefail
 
 NS="${NS:-rhel-cla-system}"

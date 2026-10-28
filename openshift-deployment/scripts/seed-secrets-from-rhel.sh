@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Seed OpenShift secrets for rhel-cla-system from the live RHEL Quadlet host.
-# Defaults match the lab box used as the source of truth for this MVP.
+# Optional lab helper (not part of the installer product interface).
+# Seed OpenShift secrets for rhel-cla-system from a live RHEL Quadlet host.
+# Cluster apply itself is: ./rhel-cla-installer rhel.cla.k8s -e @examples/openshift-lab-vars.yml
 set -euo pipefail
 
 NS="${NS:-rhel-cla-system}"
