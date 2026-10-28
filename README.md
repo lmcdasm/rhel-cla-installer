@@ -303,8 +303,8 @@ Set **`endpoint`** (the Lightspeed base URL). Do **not** put the CLA URL in
 endpoint = "http://127.0.0.1:8080/v1"
 # Leave empty for local CLA (forward proxy only — not the CLA URL)
 proxy = ""
-# Raise for local CPU Granite (see note below)
-timeout = 1800
+# Raise for local CPU Granite (see note below). 7200s = 2h.
+timeout = 7200
 ```
 
 ```
@@ -363,15 +363,18 @@ the installer wires them correctly; a reinstall can overwrite the YAML.
 
 #### CPU Granite / goose streaming timeouts ####
 
-Local Granite on CPU can take many minutes between streamed tokens. If
-`goose-proxy`’s backend `timeout` is too low (default `30`, even `300` can be
-short), the proxy drops the SSE mid-stream and Goose reports something like
-`Stream decode error: error decoding response body` even though Lightspeed
-logged `200`.
+Local Granite on CPU can take a long time before the first token and between
+streamed tokens. Despite the man page wording, `goose-proxy`’s backend
+`timeout` is also applied to idle gaps while reading the SSE body (urllib). If
+it is too low (default `30`; `300` / even `1800` can still be short on CPU), the
+proxy drops the stream and Goose reports something like
+`Stream decode error: error decoding response body` even though Lightspeed may
+have logged `200`.
 
-Raise `timeout` under `[backend]` in `/etc/xdg/goose-proxy/config.toml` (for
-example `1800`), restart `goose-proxy`, and retry. First answers on CPU are
-slow; that is expected.
+Raise `timeout` under `[backend]` in `/etc/xdg/goose-proxy/config.toml` — start
+around `7200` (2 hours) for CPU labs, restart `goose-proxy`, and retry. Bump
+again if `journalctl -u goose-proxy` still shows `socket.timeout` mid-stream.
+First answers on CPU are slow; that is expected.
 
 [`podman`]: https://podman.io/
 [rhokp_key]: https://access.redhat.com/offline/access/
