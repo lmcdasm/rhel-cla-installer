@@ -1,14 +1,20 @@
-kind: ConfigMap
 apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: "{{ okp_name }}-tar-wrapper"
+  name: {{ okp_name }}-tar-wrapper
+{% if cla_namespace | default('') %}
+  namespace: {{ cla_namespace }}
+{% endif %}
   labels:
     service: rhel-lightspeed
-    app: "{{ okp_name }}"
-
+    app: {{ okp_name }}
+    app.kubernetes.io/part-of: rhel-cla
 data:
   tar: |
     #!/bin/bash
+    # RHOKP unpacks a Solr index with setgid modes; restricted SCC cannot chmod/utime.
+    # Shadow /usr/bin/tar via PATH=/usr/local/bin first (mounted below).
     echo "tar-wrapper: called with args: $*" >&2
-    /usr/bin/tar --no-same-owner --no-same-permissions --no-overwrite-dir --touch "$@" 2>&1 | grep -v 'Cannot change mode\|Cannot utime' >&2
+    /usr/bin/tar --no-same-owner --no-same-permissions --no-overwrite-dir --touch "$@" 2>&1 \
+      | grep -v 'Cannot change mode\|Cannot utime' >&2
     exit 0

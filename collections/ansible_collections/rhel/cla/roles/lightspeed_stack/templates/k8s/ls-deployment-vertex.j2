@@ -1,0 +1,151 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: "${NAME}"
+  labels:
+    service: rhel-lightspeed
+    app: "${NAME}"
+spec:
+  replicas: "${{REPLICAS}}"
+  selector:
+    matchLabels:
+      app: "${NAME}"
+  template:
+    metadata:
+      annotations:
+        deployment-version: "${DEPLOYMENT_VERSION}"
+      labels:
+        service: rhel-lightspeed
+        app: "${NAME}"
+    spec:
+      serviceAccountName: "${NAME}"
+      volumes:
+        - name: run-config
+          configMap:
+            name: "${NAME}-run-config"
+        - name: stack-config
+          configMap:
+            name: "${NAME}-stack-config"
+        - name: gcp-credentials
+          secret:
+            secretName: vertexai
+            items:
+              - key: credentials_json
+                path: credentials.json
+        - name: system-prompt
+          configMap:
+            name: "${NAME}-system-prompt"
+        - name: splunk-token
+          secret:
+            secretName: "${SPLUNK_SECRET_NAME}"
+            items:
+              - key: token
+                path: token
+
+      containers:
+        - name: "${NAME}"
+          image: "${IMAGE}"
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: run-config
+              mountPath: /app-root/run.yaml
+              subPath: run.yaml
+              readOnly: true
+            - name: stack-config
+              mountPath: /app-root/lightspeed-stack.yaml
+              subPath: lightspeed-stack.yaml
+              readOnly: true
+            - name: gcp-credentials
+              mountPath: /etc/gcp
+              readOnly: true
+            - name: system-prompt
+              mountPath: /etc/lightspeed
+              readOnly: true
+            - name: splunk-token
+              mountPath: /etc/splunk
+              readOnly: true
+
+          env:
+            # ── Logging ──
+            - name: LIGHTSPEED_STACK_LOG_LEVEL
+              value: "${LIGHTSPEED_STACK_LOG_LEVEL}"
+            - name: LLAMA_STACK_LOGGING
+              value: "${LLAMA_STACK_LOGGING}"
+
+            # ── Sentry / GlitchTip ──
+            - name: SENTRY_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: "${SENTRY_SECRET_NAME}"
+                  key: dsn
+            - name: SENTRY_ENVIRONMENT
+              value: "${DEPLOYMENT_ENVIRONMENT}"
+
+            # ── Vertex AI ──
+            - name: VERTEXAI_PROJECT_ID
+              value: "${VERTEXAI_PROJECT_ID}"
+            - name: VERTEX_AI_LOCATION
+              value: "${VERTEX_AI_LOCATION}"
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/gcp/credentials.json
+
+            # ── Llama Stack internal storage ──
+            # Llama Stack's distribution registry creates a SQLite
+            # kvstore during initialization regardless of the
+            # metadata_store config in run.yaml.  Its default path
+            # uses the env-var substitution syntax
+            # "${env.SQLITE_STORE_DIR:=<path>}", which is treated
+            # as a literal directory name when the variable is
+            # unset — causing a PermissionError on os.makedirs().
+            # Setting a writable path here satisfies that default.
+            - name: SQLITE_STORE_DIR
+              value: /tmp/llama-store
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: "${POSTGRES_SECRET_NAME}"
+                  key: db.host
+            - name: POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: "${POSTGRES_SECRET_NAME}"
+                  key: db.port
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: "${POSTGRES_SECRET_NAME}"
+                  key: db.name
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "${POSTGRES_SECRET_NAME}"
+                  key: db.user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "${POSTGRES_SECRET_NAME}"
+                  key: db.password
+
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "${CPU_REQUEST}"
+              memory: "${MEMORY_REQUEST}"
+            limits:
+              cpu: "${CPU_LIMIT}"
+              memory: "${MEMORY_LIMIT}"

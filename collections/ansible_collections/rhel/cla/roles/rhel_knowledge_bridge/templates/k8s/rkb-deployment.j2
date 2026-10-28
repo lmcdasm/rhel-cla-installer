@@ -1,60 +1,66 @@
+apiVersion: apps/v1
 kind: Deployment
-apiVersion: v1
 metadata:
-  namespace: {{ ansible_operator_meta.namespace }}
   name: {{ rkb_name }}
-
+{% if cla_namespace | default('') %}
+  namespace: {{ cla_namespace }}
+{% endif %}
+  labels:
+    service: rhel-lightspeed
+    app: {{ rkb_name }}
+    app.kubernetes.io/part-of: rhel-cla
 spec:
   replicas: {{ rkb_replicas }}
   strategy:
     type: Recreate
-
   selector:
     matchLabels:
       app: {{ rkb_name }}
-
   template:
     metadata:
       labels:
         service: rhel-lightspeed
         app: {{ rkb_name }}
-
+        app.kubernetes.io/part-of: rhel-cla
     spec:
       serviceAccountName: {{ rkb_name }}
       containers:
         - name: {{ rkb_name }}
+{% if rkb_container_image_digest | default('') %}
+          image: {{ rkb_container_image }}@{{ rkb_container_image_digest }}
+{% else %}
           image: {{ rkb_container_image }}:{{ rkb_container_image_tag }}
+{% endif %}
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: {{ rkb_port}}
+            - name: mcp
+              containerPort: {{ rkb_port }}
               protocol: TCP
-
           env:
             - name: MCP_TRANSPORT
-              value: {{ rkb_transport }}
-
+              value: "{{ rkb_transport }}"
             - name: MCP_PORT
               value: "{{ rkb_port }}"
-
             - name: MCP_LOG_LEVEL
-              value: {{ rkb_log_level }}
-
+              value: "{{ rkb_log_level }}"
             - name: MCP_SOLR_URL
-              value: {{ rkb_solr_url }}
-
+              value: "{{ rkb_solr_url }}"
+{% if rkb_exclude_kbase | bool %}
+            - name: MCP_EXCLUDE_KBASE
+              value: "true"
+{% endif %}
           livenessProbe:
             tcpSocket:
-              port: {{ rkb_port}}
-            initialDelaySeconds: 5
+              port: mcp
+            initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 3
-
           readinessProbe:
             tcpSocket:
-              port: {{ rkb_port}}
+              port: mcp
             initialDelaySeconds: 5
             periodSeconds: 10
             failureThreshold: 3
-
           resources:
             requests:
               cpu: {{ rkb_cpu_request }}

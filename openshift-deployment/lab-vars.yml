@@ -1,0 +1,35 @@
+---
+# Lab OpenShift vars for playbooks/k8s.yml (2026-prod-1 / option B Granite).
+# Secrets are NOT here — seed with scripts/seed-secrets-from-rhel.sh first.
+
+cla_namespace: rhel-cla-system
+cla_create_namespace: true
+cla_network_policies: true
+cla_resource_quota: true
+cla_granite_connectivity_job: true
+cla_pull_secret_name: redhat-pull-secret
+cla_granite_host: 10.20.1.200
+cla_granite_port: 8000
+cla_granite_cidr: 10.20.1.200/32
+
+okp_state: present
+okp_use_pvc: true
+okp_pvc_name: rh-offline-knowledge-portal-data
+okp_pvc_size: 40Gi
+okp_container_image_digest: sha256:7f4764ba3c76f1f4b062cbc7847e1eb5a06064c172030f2c9ff3e729ac637b8c
+
+rkb_state: present
+rkb_container_image_digest: sha256:2eb8f92f7f093a419e8f01bcb42e7d61729d0177c54f95dd162bd8bc56f36e48
+
+ls_state: present
+ls_create_route: true
+ls_deployment_environment: openshift
+ls_container_image_digest: sha256:4094c9b5601983497b2dac5f0e6b3e1cb8e6094eaab30f05d0a7a535a49c179c
+
+rhel_cla_provider: ramalama
+ramalama_config:
+  # Must match lab Granite /v1/models id (currently ibm-granite/granite-4.1-8b-GGUF).
+  default_model: ibm-granite/granite-4.1-8b-GGUF
+  api_key: sk-no-key-required
+  base_url: http://10.20.1.200:8000/v1
+  model_path: ibm-granite/granite-4.1-8b-GGUF

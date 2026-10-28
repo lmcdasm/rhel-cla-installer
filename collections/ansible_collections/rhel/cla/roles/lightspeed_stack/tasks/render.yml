@@ -1,0 +1,20 @@
+---
+- name: Render Lightspeed manifests
+  ansible.builtin.template:
+    src: "k8s/{{ item }}"
+    dest: "{{ cla_render_dir }}/3{{ idx }}-{{ item | regex_replace('\\.j2$', '.yml') }}"
+    mode: "0644"
+  loop:
+    - ls-configmap.j2
+    - ls-serviceaccount.j2
+    - ls-service.j2
+    - ls-deployment.j2
+  loop_control:
+    index_var: idx
+
+- name: Render Lightspeed OpenShift Route
+  ansible.builtin.template:
+    src: k8s/ls-route.j2
+    dest: "{{ cla_render_dir }}/34-ls-route.yml"
+    mode: "0644"
+  when: ls_create_route | bool

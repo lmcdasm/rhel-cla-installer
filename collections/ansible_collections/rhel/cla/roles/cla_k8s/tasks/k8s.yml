@@ -1,0 +1,35 @@
+- name: Create CLA namespace
+  kubernetes.core.k8s:
+    state: "{{ cla_state }}"
+    template: templates/k8s/namespace.j2
+  when: cla_create_namespace | bool
+  tags:
+    - cla_k8s
+    - k8s
+
+- name: Apply CLA ResourceQuota and LimitRange
+  kubernetes.core.k8s:
+    state: "{{ cla_state }}"
+    template: templates/k8s/resource-quota.j2
+  when: cla_resource_quota | bool
+  tags:
+    - cla_k8s
+    - k8s
+
+- name: Apply CLA NetworkPolicies
+  kubernetes.core.k8s:
+    state: "{{ cla_state }}"
+    template: templates/k8s/networkpolicy.j2
+  when: cla_network_policies | bool
+  tags:
+    - cla_k8s
+    - k8s
+
+- name: Apply Granite connectivity Job and egress policy
+  kubernetes.core.k8s:
+    state: "{{ cla_state }}"
+    template: templates/k8s/granite-connectivity-job.j2
+  when: cla_granite_connectivity_job | bool
+  tags:
+    - cla_k8s
+    - k8s

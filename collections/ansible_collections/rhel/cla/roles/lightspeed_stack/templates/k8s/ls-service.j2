@@ -1,14 +1,19 @@
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
-  name: "${SERVICE_NAME}"
+  name: {{ ls_name }}
+{% if cla_namespace | default('') %}
+  namespace: {{ cla_namespace }}
+{% endif %}
   labels:
     service: rhel-lightspeed
-    app: "${NAME}"
+    app: {{ ls_name }}
+    app.kubernetes.io/part-of: rhel-cla
 spec:
-  ports:
-    - port: 80
-      protocol: TCP
-      targetPort: 8080
   selector:
-    app: "${NAME}"
+    app: {{ ls_name }}
+  ports:
+    - name: http
+      port: {{ ls_service_port }}
+      targetPort: http
+      protocol: TCP

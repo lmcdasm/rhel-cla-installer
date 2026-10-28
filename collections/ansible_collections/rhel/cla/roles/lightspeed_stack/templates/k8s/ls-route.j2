@@ -1,15 +1,25 @@
-kind: Route
 apiVersion: route.openshift.io/v1
+kind: Route
 metadata:
   name: {{ ls_name }}
+{% if cla_namespace | default('') %}
+  namespace: {{ cla_namespace }}
+{% endif %}
   labels:
     service: rhel-lightspeed
     app: {{ ls_name }}
+    app.kubernetes.io/part-of: rhel-cla
+  annotations:
+    # Lab Granite on a slow host — keep the router from cutting off long non-stream replies.
+    haproxy.router.openshift.io/timeout: "{{ ls_route_timeout | default('7200s') }}"
 spec:
   to:
     kind: Service
-    name: "${SERVICE_NAME}"
+    name: {{ ls_name }}
+    weight: 100
   port:
-    targetPort: 8080
+    targetPort: http
   tls:
     termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None

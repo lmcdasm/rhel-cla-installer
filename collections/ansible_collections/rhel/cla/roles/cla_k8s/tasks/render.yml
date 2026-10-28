@@ -1,0 +1,34 @@
+---
+- name: Ensure render output directory
+  ansible.builtin.file:
+    path: "{{ cla_render_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Render CLA namespace
+  ansible.builtin.template:
+    src: k8s/namespace.j2
+    dest: "{{ cla_render_dir }}/00-namespace.yml"
+    mode: "0644"
+  when: cla_create_namespace | bool
+
+- name: Render CLA ResourceQuota and LimitRange
+  ansible.builtin.template:
+    src: k8s/resource-quota.j2
+    dest: "{{ cla_render_dir }}/01-resource-quota.yml"
+    mode: "0644"
+  when: cla_resource_quota | bool
+
+- name: Render CLA NetworkPolicies
+  ansible.builtin.template:
+    src: k8s/networkpolicy.j2
+    dest: "{{ cla_render_dir }}/02-networkpolicy.yml"
+    mode: "0644"
+  when: cla_network_policies | bool
+
+- name: Render Granite connectivity Job
+  ansible.builtin.template:
+    src: k8s/granite-connectivity-job.j2
+    dest: "{{ cla_render_dir }}/03-granite-connectivity-job.yml"
+    mode: "0644"
+  when: cla_granite_connectivity_job | bool

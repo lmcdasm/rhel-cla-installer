@@ -1,13 +1,8 @@
-# One-shot Job: verify in-cluster reachability to lab Granite (option B).
-#   oc -n rhel-cla-system delete job granite-connectivity --ignore-not-found
-#   oc apply -k overlays/lab   # or apply this file
-#   oc -n rhel-cla-system wait --for=condition=complete job/granite-connectivity --timeout=120s
-#   oc -n rhel-cla-system logs job/granite-connectivity
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: granite-connectivity
-  namespace: rhel-cla-system
+  namespace: {{ cla_namespace }}
   labels:
     app: granite-connectivity
     app.kubernetes.io/part-of: rhel-cla
@@ -23,17 +18,16 @@ spec:
       restartPolicy: Never
       containers:
         - name: curl
-          # Full UBI includes curl (ubi-minimal does not).
-          image: registry.access.redhat.com/ubi9/ubi:9.6
+          image: {{ cla_granite_job_image }}
           imagePullPolicy: IfNotPresent
           command:
             - /bin/sh
             - -c
             - |
               set -eu
-              echo "GET http://10.20.1.200:8000/v1/models"
+              echo "GET http://{{ cla_granite_host }}:{{ cla_granite_port }}/v1/models"
               curl -sf --connect-timeout 10 --max-time 30 \
-                http://10.20.1.200:8000/v1/models | head -c 400
+                http://{{ cla_granite_host }}:{{ cla_granite_port }}/v1/models | head -c 400
               echo
               echo "OK: in-cluster Granite connectivity succeeded"
           resources:
@@ -48,7 +42,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-egress-granite-job
-  namespace: rhel-cla-system
+  namespace: {{ cla_namespace }}
   labels:
     app.kubernetes.io/part-of: rhel-cla
 spec:
@@ -60,15 +54,11 @@ spec:
   egress:
     - to:
         - ipBlock:
-            cidr: 10.20.1.200/32
+            cidr: {{ cla_granite_cidr }}
       ports:
         - protocol: TCP
-          port: 8000
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/cluster-dns: "true"
-      ports:
+          port: {{ cla_granite_port }}
+    - ports:
         - protocol: UDP
           port: 53
         - protocol: TCP

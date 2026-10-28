@@ -1,12 +1,21 @@
-- name: Setup Lightspeed Stack
+- name: Setup Lightspeed Stack (k8s)
   kubernetes.core.k8s:
     state: "{{ ls_state }}"
     template: templates/k8s/{{ item }}
   loop:
     - ls-configmap.j2
-    - ls-deployment.j2
-    - ls-route.j2
-    - ls-service.j2
     - ls-serviceaccount.j2
+    - ls-service.j2
+    - ls-deployment.j2
   tags:
     - ls
+    - k8s
+
+- name: Create Lightspeed OpenShift Route
+  kubernetes.core.k8s:
+    state: "{{ ls_state }}"
+    template: templates/k8s/ls-route.j2
+  when: ls_create_route | bool
+  tags:
+    - ls
+    - k8s

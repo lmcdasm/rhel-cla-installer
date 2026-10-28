@@ -1,21 +1,23 @@
-kind: Deployment
 apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: {{ okp_name }}
+{% if cla_namespace | default('') %}
+  namespace: {{ cla_namespace }}
+{% endif %}
   labels:
     service: rhel-lightspeed
     app: {{ okp_name }}
+    app.kubernetes.io/part-of: rhel-cla
 spec:
   replicas: {{ okp_replicas }}
   # Recreate: RWO/data volume + long index extract — do not surge a second pod.
   strategy:
     type: Recreate
   progressDeadlineSeconds: 3600
-
   selector:
     matchLabels:
       app: {{ okp_name }}
-
   template:
     metadata:
       annotations:
@@ -23,78 +25,82 @@ spec:
       labels:
         service: rhel-lightspeed
         app: {{ okp_name }}
-
+        app.kubernetes.io/part-of: rhel-cla
     spec:
       serviceAccountName: {{ okp_name }}
-      volumes:
-        - name: solr-data
-          emptyDir: {}
-
-        - name: tar-wrapper
-          configMap:
-            name: {{ okp_name }}-tar-wrapper
-            defaultMode: 0755
-
       containers:
         - name: {{ okp_name }}
+{% if okp_container_image_digest | default('') %}
+          image: {{ okp_container_image }}@{{ okp_container_image_digest }}
+{% else %}
           image: {{ okp_container_image }}:{{ okp_container_image_tag }}
+{% endif %}
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: {{ okp_port }}
+            - name: solr
+              containerPort: {{ okp_port }}
               protocol: TCP
-
-          volumeMounts:
-            - name: solr-data
-              mountPath: /opt/solr/server/solr/portal/data
-
-            - name: tar-wrapper
-              mountPath: /usr/local/bin/tar
-              subPath: tar
-
+            - name: http
+              containerPort: {{ okp_http_port }}
+              protocol: TCP
           env:
             - name: ACCESS_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ okp_access_key.name }}
                   key: {{ okp_access_key.key }}
-
             - name: SOLR_HOST_BIND
-              value: {{ okp_solr_host_bind }}
-
+              value: "{{ okp_solr_host_bind }}"
             - name: SOLR_LOG_LEVEL
-              value: {{ okp_solr_log_level }}
-
+              value: "{{ okp_solr_log_level }}"
+            # Prefer mounted wrapper for tar, but keep /usr/sbin (httpd) from the image.
             - name: PATH
               value: /usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin
-
+          volumeMounts:
+            - name: solr-data
+              mountPath: /opt/solr/server/solr/portal/data
+            - name: tar-wrapper
+              mountPath: /usr/local/bin/tar
+              subPath: tar
+          securityContext:
+            allowPrivilegeEscalation: false
           # First boot pulls/extracts a large Lucene index; keep probes from killing it.
           # startup window ≈ initialDelay + failureThreshold*period ≈ 45m
           startupProbe:
             tcpSocket:
-              port: {{ okp_port }}
+              port: solr
             initialDelaySeconds: 120
             periodSeconds: 15
             timeoutSeconds: 5
             failureThreshold: 160
-
           livenessProbe:
             tcpSocket:
-              port: {{ okp_port }}
+              port: solr
             periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 6
-
           readinessProbe:
             tcpSocket:
-              port: {{ okp_port }}
+              port: solr
             periodSeconds: 15
             timeoutSeconds: 5
             failureThreshold: 6
-
           resources:
             requests:
               cpu: {{ okp_cpu_request }}
               memory: {{ okp_memory_request }}
-
             limits:
               cpu: {{ okp_cpu_limit }}
               memory: {{ okp_memory_limit }}
+      volumes:
+        - name: solr-data
+{% if okp_use_pvc | bool %}
+          persistentVolumeClaim:
+            claimName: {{ okp_pvc_name }}
+{% else %}
+          emptyDir: {}
+{% endif %}
+        - name: tar-wrapper
+          configMap:
+            name: {{ okp_name }}-tar-wrapper
+            defaultMode: 0755

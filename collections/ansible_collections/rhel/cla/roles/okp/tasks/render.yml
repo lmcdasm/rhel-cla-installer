@@ -1,0 +1,20 @@
+---
+- name: Render OKP PVC
+  ansible.builtin.template:
+    src: k8s/okp-pvc.j2
+    dest: "{{ cla_render_dir }}/10-okp-pvc.yml"
+    mode: "0644"
+  when: okp_use_pvc | bool
+
+- name: Render OKP manifests
+  ansible.builtin.template:
+    src: "k8s/{{ item }}"
+    dest: "{{ cla_render_dir }}/1{{ idx }}-{{ item | regex_replace('\\.j2$', '.yml') }}"
+    mode: "0644"
+  loop:
+    - okp-configmap.j2
+    - okp-service-account.j2
+    - okp-service.j2
+    - okp-deployment.j2
+  loop_control:
+    index_var: idx

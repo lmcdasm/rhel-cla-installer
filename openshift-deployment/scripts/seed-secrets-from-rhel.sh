@@ -121,7 +121,12 @@ oc -n "${NS}" create secret generic okp-access-key \
   --from-file=ACCESS_KEY="${WORKDIR}/okp_key.txt" \
   --dry-run=client -o yaml | oc apply -f -
 
-echo "==> Linking pull secret to default SA"
-oc -n "${NS}" patch sa default -p '{"imagePullSecrets":[{"name":"redhat-pull-secret"}]}' >/dev/null
+echo "==> Linking pull secret to default + workload SAs"
+for sa in default rh-offline-knowledge-portal rhel-knowledge-bridge lightspeed-stack; do
+  if oc -n "${NS}" get sa "${sa}" >/dev/null 2>&1; then
+    oc -n "${NS}" patch sa "${sa}" -p '{"imagePullSecrets":[{"name":"redhat-pull-secret"}]}' >/dev/null
+  fi
+done
 
 echo "Done. Secrets ready in ${NS}."
+# Note: Ansible SA templates also set imagePullSecrets when cla_pull_secret_name is set.

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ cla_namespace }}
+  labels:
+    app.kubernetes.io/part-of: rhel-cla
+  annotations:
+    # OpenShift project display (ignored on plain k8s)
+    openshift.io/display-name: RHEL CLA

@@ -1,0 +1,12 @@
+---
+- name: Render RKB manifests
+  ansible.builtin.template:
+    src: "k8s/{{ item }}"
+    dest: "{{ cla_render_dir }}/2{{ idx }}-{{ item | regex_replace('\\.j2$', '.yml') }}"
+    mode: "0644"
+  loop:
+    - rkb-service-account.j2
+    - rkb-service.j2
+    - rkb-deployment.j2
+  loop_control:
+    index_var: idx

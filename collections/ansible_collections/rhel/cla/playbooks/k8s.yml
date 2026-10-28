@@ -1,17 +1,33 @@
+---
+# Deploy RHEL CLA to Kubernetes / OpenShift using role k8s templates.
+# Lab example:
+#   ansible-playbook -i localhost, \
+#     collections/ansible_collections/rhel/cla/playbooks/k8s.yml \
+#     -e @openshift-deployment/lab-vars.yml
 - name: Setup RHEL CLA in K8S
   hosts: localhost
-  gather_facts: no
-  become: no
+  gather_facts: false
+  become: false
+  collections:
+    - kubernetes.core
 
   tasks:
-    - import_role:
+    - name: Shared namespace / NetPol / quota / optional Granite Job
+      ansible.builtin.import_role:
+        name: rhel.cla.cla_k8s
+        tasks_from: k8s
+
+    - name: Offline Knowledge Portal
+      ansible.builtin.import_role:
         name: rhel.cla.okp
         tasks_from: k8s
 
-    - import_role:
+    - name: RHEL Knowledge Bridge
+      ansible.builtin.import_role:
         name: rhel.cla.rhel_knowledge_bridge
         tasks_from: k8s
 
-    - import_role:
+    - name: Lightspeed Stack
+      ansible.builtin.import_role:
         name: rhel.cla.lightspeed_stack
         tasks_from: k8s

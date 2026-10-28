@@ -1,0 +1,26 @@
+# Shared OpenShift / k8s cluster scaffolding for the CLA stack.
+cla_namespace: rhel-cla-system
+cla_state: present
+
+# When set, ServiceAccounts reference this docker-registry pull secret
+cla_pull_secret_name: ""
+
+cla_create_namespace: true
+cla_network_policies: true
+cla_resource_quota: true
+cla_granite_connectivity_job: false
+
+# Lab Granite (option B) — used by NetPol egress + connectivity Job
+cla_granite_host: 10.20.1.200
+cla_granite_port: 8000
+cla_granite_cidr: 10.20.1.200/32
+
+cla_quota_pods: "20"
+cla_quota_requests_cpu: "8"
+cla_quota_requests_memory: 16Gi
+cla_quota_limits_cpu: "16"
+cla_quota_limits_memory: 32Gi
+cla_quota_pvcs: "4"
+cla_quota_storage: 100Gi
+
+cla_granite_job_image: registry.access.redhat.com/ubi9/ubi:9.6

@@ -1,6 +1,8 @@
 ls_name: lightspeed-stack
 ls_container_image: registry.redhat.io/lightspeed-core/lightspeed-stack-rhel9
 ls_container_image_tag: 0.6.4
+ls_container_image_digest: ""
+
 ls_config_dir: /var/lib/containers/lightspeed-stack
 ls_config_files:
   - lightspeed-stack-{{ _ls_major_version }}.yml
@@ -9,9 +11,24 @@ ls_config_files:
 
 ls_host: 0.0.0.0
 ls_port: 8081
+ls_service_port: 8080
 ls_auth_enabled: no
 ls_workers: 1
 ls_deployment_environment: local
+ls_replicas: 1
+ls_cpu_request: 500m
+ls_cpu_limit: "2"
+ls_memory_request: 1Gi
+ls_memory_limit: 4Gi
+
+ls_state: present
+cla_namespace: ""
+cla_pull_secret_name: ""
+
+# Create an OpenShift Route for the Lightspeed service
+ls_create_route: true
+# Router idle/timeout for long lab-Granite responses (non-streaming)
+ls_route_timeout: 7200s
 
 rhel_cla_provider: ~
 

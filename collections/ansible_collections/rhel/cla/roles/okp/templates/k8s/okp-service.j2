@@ -1,18 +1,23 @@
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
-  namespace: {{ ansible_operator_meta.namespace }}
-    name: {{ okp_name }}
-    labels:
-      service: rhel-lightspeed
-      app: "${NAME}"
-
+  name: {{ okp_name }}
+{% if cla_namespace | default('') %}
+  namespace: {{ cla_namespace }}
+{% endif %}
+  labels:
+    service: rhel-lightspeed
+    app: {{ okp_name }}
+    app.kubernetes.io/part-of: rhel-cla
 spec:
-  sessionAffinity: ClientIP
-  ports:
-    - port: {{ okp_port }}
-      protocol: TCP
-      targetPort: {{ okp_port }}
-
   selector:
-      app: {{ okp_name }}
+    app: {{ okp_name }}
+  ports:
+    - name: solr
+      port: {{ okp_port }}
+      targetPort: solr
+      protocol: TCP
+    - name: http
+      port: {{ okp_http_port }}
+      targetPort: http
+      protocol: TCP

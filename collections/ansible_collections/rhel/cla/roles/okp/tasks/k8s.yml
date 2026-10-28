@@ -1,11 +1,21 @@
-- name: Setup Red Hat Offline Knowledge Portal
+- name: Create OKP Solr data PVC
+  kubernetes.core.k8s:
+    state: "{{ okp_state }}"
+    template: templates/k8s/okp-pvc.j2
+  when: okp_use_pvc | bool
+  tags:
+    - okp
+    - k8s
+
+- name: Setup Red Hat Offline Knowledge Portal (k8s)
   kubernetes.core.k8s:
     state: "{{ okp_state }}"
     template: templates/k8s/{{ item }}
   loop:
     - okp-configmap.j2
-    - okp-deployment.j2
     - okp-service-account.j2
     - okp-service.j2
+    - okp-deployment.j2
   tags:
     - okp
+    - k8s

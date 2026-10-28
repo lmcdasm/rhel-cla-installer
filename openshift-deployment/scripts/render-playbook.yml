@@ -1,0 +1,36 @@
+---
+# Review aid: dump the same role k8s templates apply would use.
+# Invoked by openshift-deployment/scripts/render.sh — do not edit generated/ by hand.
+- name: Render RHEL CLA k8s manifests
+  hosts: localhost
+  gather_facts: false
+  become: false
+  collections:
+    - kubernetes.core
+
+  tasks:
+    - name: Require render output directory
+      ansible.builtin.assert:
+        that:
+          - cla_render_dir is defined
+          - cla_render_dir | length > 0
+
+    - name: Shared namespace / NetPol / quota / optional Granite Job
+      ansible.builtin.import_role:
+        name: rhel.cla.cla_k8s
+        tasks_from: render
+
+    - name: Offline Knowledge Portal
+      ansible.builtin.import_role:
+        name: rhel.cla.okp
+        tasks_from: render
+
+    - name: RHEL Knowledge Bridge
+      ansible.builtin.import_role:
+        name: rhel.cla.rhel_knowledge_bridge
+        tasks_from: render
+
+    - name: Lightspeed Stack
+      ansible.builtin.import_role:
+        name: rhel.cla.lightspeed_stack
+        tasks_from: render

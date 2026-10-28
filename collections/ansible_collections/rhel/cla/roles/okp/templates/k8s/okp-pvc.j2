@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ okp_pvc_name }}
+{% if cla_namespace | default('') %}
+  namespace: {{ cla_namespace }}
+{% endif %}
+  labels:
+    app: {{ okp_name }}
+    app.kubernetes.io/part-of: rhel-cla
+spec:
+  accessModes:
+    - {{ okp_pvc_access_mode }}
+  resources:
+    requests:
+      storage: {{ okp_pvc_size }}
+{% if okp_pvc_storage_class | default('') %}
+  storageClassName: {{ okp_pvc_storage_class }}
+{% endif %}

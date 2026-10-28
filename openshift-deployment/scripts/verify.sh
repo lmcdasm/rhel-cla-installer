@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Post-apply checks for the lab overlay on the current oc context.
+# Post-apply checks for the Ansible k8s lab deploy on the current oc context.
 set -euo pipefail
 
 NS="${NS:-rhel-cla-system}"

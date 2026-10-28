@@ -1,151 +1,80 @@
-kind: Deployment
 apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: "${NAME}"
+  name: {{ ls_name }}
+{% if cla_namespace | default('') %}
+  namespace: {{ cla_namespace }}
+{% endif %}
   labels:
     service: rhel-lightspeed
-    app: "${NAME}"
+    app: {{ ls_name }}
+    app.kubernetes.io/part-of: rhel-cla
 spec:
-  replicas: "${{REPLICAS}}"
+  replicas: {{ ls_replicas }}
   selector:
     matchLabels:
-      app: "${NAME}"
+      app: {{ ls_name }}
   template:
     metadata:
-      annotations:
-        deployment-version: "${DEPLOYMENT_VERSION}"
       labels:
         service: rhel-lightspeed
-        app: "${NAME}"
+        app: {{ ls_name }}
+        app.kubernetes.io/part-of: rhel-cla
     spec:
-      serviceAccountName: "${NAME}"
-      volumes:
-        - name: run-config
-          configMap:
-            name: "${NAME}-run-config"
-        - name: stack-config
-          configMap:
-            name: "${NAME}-stack-config"
-        - name: gcp-credentials
-          secret:
-            secretName: vertexai
-            items:
-              - key: credentials_json
-                path: credentials.json
-        - name: system-prompt
-          configMap:
-            name: "${NAME}-system-prompt"
-        - name: splunk-token
-          secret:
-            secretName: "${SPLUNK_SECRET_NAME}"
-            items:
-              - key: token
-                path: token
-
+      serviceAccountName: {{ ls_name }}
       containers:
-        - name: "${NAME}"
-          image: "${IMAGE}"
+        - name: {{ ls_name }}
+{% if ls_container_image_digest | default('') %}
+          image: {{ ls_container_image }}@{{ ls_container_image_digest }}
+{% else %}
+          image: {{ ls_container_image }}:{{ ls_container_image_tag }}
+{% endif %}
+          imagePullPolicy: IfNotPresent
+          args:
+            - --config
+            - /app-root/lightspeed-stack.yml
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: {{ ls_port }}
               protocol: TCP
-          volumeMounts:
-            - name: run-config
-              mountPath: /app-root/run.yaml
-              subPath: run.yaml
-              readOnly: true
-            - name: stack-config
-              mountPath: /app-root/lightspeed-stack.yaml
-              subPath: lightspeed-stack.yaml
-              readOnly: true
-            - name: gcp-credentials
-              mountPath: /etc/gcp
-              readOnly: true
-            - name: system-prompt
-              mountPath: /etc/lightspeed
-              readOnly: true
-            - name: splunk-token
-              mountPath: /etc/splunk
-              readOnly: true
-
           env:
-            # ── Logging ──
-            - name: LIGHTSPEED_STACK_LOG_LEVEL
-              value: "${LIGHTSPEED_STACK_LOG_LEVEL}"
-            - name: LLAMA_STACK_LOGGING
-              value: "${LLAMA_STACK_LOGGING}"
-
-            # ── Sentry / GlitchTip ──
-            - name: SENTRY_DSN
-              valueFrom:
-                secretKeyRef:
-                  name: "${SENTRY_SECRET_NAME}"
-                  key: dsn
-            - name: SENTRY_ENVIRONMENT
-              value: "${DEPLOYMENT_ENVIRONMENT}"
-
-            # ── Vertex AI ──
-            - name: VERTEXAI_PROJECT_ID
-              value: "${VERTEXAI_PROJECT_ID}"
-            - name: VERTEX_AI_LOCATION
-              value: "${VERTEX_AI_LOCATION}"
-            - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: /etc/gcp/credentials.json
-
-            # ── Llama Stack internal storage ──
-            # Llama Stack's distribution registry creates a SQLite
-            # kvstore during initialization regardless of the
-            # metadata_store config in run.yaml.  Its default path
-            # uses the env-var substitution syntax
-            # "${env.SQLITE_STORE_DIR:=<path>}", which is treated
-            # as a literal directory name when the variable is
-            # unset — causing a PermissionError on os.makedirs().
-            # Setting a writable path here satisfies that default.
             - name: SQLITE_STORE_DIR
               value: /tmp/llama-store
-            - name: POSTGRES_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: "${POSTGRES_SECRET_NAME}"
-                  key: db.host
-            - name: POSTGRES_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: "${POSTGRES_SECRET_NAME}"
-                  key: db.port
-            - name: POSTGRES_DB
-              valueFrom:
-                secretKeyRef:
-                  name: "${POSTGRES_SECRET_NAME}"
-                  key: db.name
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: "${POSTGRES_SECRET_NAME}"
-                  key: db.user
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: "${POSTGRES_SECRET_NAME}"
-                  key: db.password
-
+          volumeMounts:
+            - name: stack-config
+              mountPath: /app-root/lightspeed-stack.yml
+              subPath: lightspeed-stack.yml
+              readOnly: true
+            - name: stack-config
+              mountPath: /app-root/llama-stack.yml
+              subPath: llama-stack.yml
+              readOnly: true
+            - name: stack-config
+              mountPath: /app-root/system_prompt.txt
+              subPath: system_prompt.txt
+              readOnly: true
           livenessProbe:
             httpGet:
-              path: /liveness
-              port: 8080
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            failureThreshold: 3
+              path: /api/lightspeed/liveness
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            failureThreshold: 5
           readinessProbe:
             httpGet:
-              path: /readiness
-              port: 8080
+              path: /api/lightspeed/liveness
+              port: http
             initialDelaySeconds: 10
-            periodSeconds: 30
-            failureThreshold: 3
+            periodSeconds: 15
+            failureThreshold: 5
           resources:
             requests:
-              cpu: "${CPU_REQUEST}"
-              memory: "${MEMORY_REQUEST}"
+              cpu: {{ ls_cpu_request }}
+              memory: {{ ls_memory_request }}
             limits:
-              cpu: "${CPU_LIMIT}"
-              memory: "${MEMORY_LIMIT}"
+              cpu: {{ ls_cpu_limit }}
+              memory: {{ ls_memory_limit }}
+      volumes:
+        - name: stack-config
+          configMap:
+            name: {{ ls_name }}-config

@@ -1,0 +1,7 @@
+galaxy_info:
+  role_name: cla_k8s
+  author: rhel-lightspeed
+  description: Shared Kubernetes/OpenShift scaffolding for the RHEL CLA stack
+  license: Apache-2.0
+  min_ansible_version: "2.14"
+dependencies: []
