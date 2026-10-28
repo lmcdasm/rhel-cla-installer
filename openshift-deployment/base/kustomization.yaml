@@ -9,6 +9,7 @@ resources:
   - networkpolicy.yaml
   - okp-sa.yaml
   - okp-pvc.yaml
+  - okp-tar-wrapper-cm.yaml
   - okp-deployment.yaml
   - okp-service.yaml
   - rkb-sa.yaml

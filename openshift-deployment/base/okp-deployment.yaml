@@ -8,16 +8,19 @@ metadata:
     app.kubernetes.io/part-of: rhel-cla
 spec:
   replicas: 1
+  # Recreate: RWO PVC + long Solr/index extract — RollingUpdate surges a 2nd pod
+  # that cannot attach the volume and both crashloop.
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+    type: Recreate
+  progressDeadlineSeconds: 3600
   selector:
     matchLabels:
       app: rh-offline-knowledge-portal
   template:
     metadata:
+      annotations:
+        # Bump when tar-wrapper changes so pods roll
+        configmap-hash: tar-wrapper-v5
       labels:
         app: rh-offline-knowledge-portal
         app.kubernetes.io/part-of: rhel-cla
@@ -45,27 +48,38 @@ spec:
               value: "0.0.0.0"
             - name: SOLR_LOG_LEVEL
               value: INFO
+            # Prefer mounted wrapper for `tar`, but keep /usr/sbin (httpd) from the image.
+            - name: PATH
+              value: /usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin
           volumeMounts:
             - name: solr-data
               mountPath: /opt/solr/server/solr/portal/data
+            - name: tar-wrapper
+              mountPath: /usr/local/bin/tar
+              subPath: tar
           securityContext:
             allowPrivilegeEscalation: false
+          # First boot pulls/extracts a large Lucene index; keep probes from killing it.
+          # startup window ≈ initialDelay + failureThreshold*period ≈ 45m
           startupProbe:
             tcpSocket:
               port: solr
-            initialDelaySeconds: 15
-            periodSeconds: 10
-            failureThreshold: 36
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 160
           livenessProbe:
             tcpSocket:
               port: solr
-            periodSeconds: 15
-            failureThreshold: 3
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 6
           readinessProbe:
             tcpSocket:
               port: solr
-            periodSeconds: 10
-            failureThreshold: 3
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 6
           resources:
             requests:
               cpu: "1"
@@ -77,3 +91,7 @@ spec:
         - name: solr-data
           persistentVolumeClaim:
             claimName: rh-offline-knowledge-portal-data
+        - name: tar-wrapper
+          configMap:
+            name: rh-offline-knowledge-portal-tar-wrapper
+            defaultMode: 0755

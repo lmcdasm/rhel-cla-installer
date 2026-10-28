@@ -7,11 +7,10 @@ metadata:
     app: {{ okp_name }}
 spec:
   replicas: {{ okp_replicas }}
+  # Recreate: RWO/data volume + long index extract — do not surge a second pod.
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+    type: Recreate
+  progressDeadlineSeconds: 3600
 
   selector:
     matchLabels:
@@ -40,7 +39,7 @@ spec:
         - name: {{ okp_name }}
           image: {{ okp_container_image }}:{{ okp_container_image_tag }}
           ports:
-            - containerPort: {{ okp_part }}
+            - containerPort: {{ okp_port }}
               protocol: TCP
 
           volumeMounts:
@@ -64,24 +63,32 @@ spec:
             - name: SOLR_LOG_LEVEL
               value: {{ okp_solr_log_level }}
 
+            - name: PATH
+              value: /usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin
+
+          # First boot pulls/extracts a large Lucene index; keep probes from killing it.
+          # startup window ≈ initialDelay + failureThreshold*period ≈ 45m
           startupProbe:
             tcpSocket:
-              port: {{ okp_part }}
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            failureThreshold: 18
+              port: {{ okp_port }}
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 160
 
           livenessProbe:
             tcpSocket:
-              port: {{ okp_part }}
-            periodSeconds: 10
-            failureThreshold: 3
+              port: {{ okp_port }}
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 6
 
           readinessProbe:
             tcpSocket:
-              port: {{ okp_part }}
-            periodSeconds: 10
-            failureThreshold: 3
+              port: {{ okp_port }}
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 6
 
           resources:
             requests:

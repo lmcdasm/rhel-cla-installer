@@ -19,7 +19,7 @@ Namespace: `rhel-cla-system`
 | Images / tags | Exact tags from the live Quadlet `.image` units | Bit-for-bit parity with what already works on `rhel-1-vm` |
 | Config source | `/var/lib/containers/lightspeed-stack/*` + `inventory/hosts.yml` on the RHEL host | Avoid inventing new provider wiring; port what Ansible already rendered |
 | Secrets | Created at apply time from host `auth.json` + `okp_access_key` | Never commit OKP key or registry credentials |
-| Packaging | Static YAML + Kustomize (not Ansible k8s role) | Existing `roles/*/templates/k8s/*.j2` are WIP (e.g. `okp_part` typo, Vertex-centric LS); clean manifests are clearer for review |
+| Packaging | Static YAML + Kustomize (primary); Ansible `roles/*/templates/k8s/*.j2` kept in sync for Quadlet/k8s dual path | Reviewable manifests; j2 must match (OKP: Recreate, tar-wrapper, long probes) |
 | Network note | Lab Granite must be reachable at `10.20.1.200:8000` from cluster nodes | Live host already publishes `0.0.0.0:8000`; ensure firewalld allows it if pods cannot connect |
 | Ports | Lightspeed Service `:8080` → container `:8081`; OKP Solr `:8983`; RKB MCP `:8192` | Mirrors Quadlet `PublishPort=8080:8081` and in-pod localhost URLs rewritten to Services |
 
@@ -110,6 +110,9 @@ openshift-deployment/
   examples/
     command-line-assistant.config.toml.example
   base/                            # Namespace, Deployments, Services, Route, SAs, PVC
+    okp-deployment.yaml            # Recreate + long startupProbe + tar-wrapper mount
+    okp-tar-wrapper-cm.yaml        # Shadows tar for Solr index unpack under restricted SCC
+    okp-pvc.yaml                   # 40Gi RWO lvms-vg1 for Solr data
     config/                        # Lightspeed config ported from the RHEL host
       lightspeed-stack.yml
       llama-stack.yml              # base_url -> http://10.20.1.200:8000/v1
@@ -162,14 +165,39 @@ make -C openshift-deployment status
 make -C openshift-deployment verify
 ```
 
+## OKP on OpenShift (must ship with the manifests)
+
+RHOKP’s first start unpacks a large Solr/Lucene index. On OpenShift that interacts
+badly with default probes, RollingUpdate, and restricted SCC unless the delivered
+manifests encode the following (already in `base/` and mirrored in
+`roles/okp/templates/k8s/`):
+
+| Requirement | Manifest behavior | Why |
+| --- | --- | --- |
+| Single pod / RWO | `strategy: Recreate` (not RollingUpdate `maxSurge: 1`) | Second surged pod cannot attach the RWO PVC; both crashloop |
+| Long first boot | `startupProbe` ~45m window; softer liveness/readiness; `progressDeadlineSeconds: 3600` | Index pull/extract takes far longer than default probe budgets |
+| Restricted SCC unpack | ConfigMap `rh-offline-knowledge-portal-tar-wrapper` mounted at `/usr/local/bin/tar` + `PATH=/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin` | Stock `tar` fails with `Cannot change mode` / `Cannot utime` (setgid) → **`ERR_013`**. Do **not** set a PATH that omits `/usr/sbin` or `run-httpd` fails with `exec: httpd: not found`. Not a corrupt image. |
+| Durable index | PVC `rh-offline-knowledge-portal-data` (40Gi RWO) | Survives pod restarts; wipe only when re-seeding a failed partial extract |
+
+When changing the wrapper script, bump the pod template annotation
+`configmap-hash` (e.g. `tar-wrapper-v5`) so the Deployment rolls.
+
+Ansible/Quadlet path: keep
+`collections/ansible_collections/rhel/cla/roles/okp/templates/k8s/okp-deployment.j2`
+and `okp-configmap.j2` aligned with the static YAML above.
+
 ## Troubleshooting / known issues
 
 | Symptom | Likely cause | What to do |
 | --- | --- | --- |
 | Pods stuck `ContainerCreating` / `Pulling` for a long time | OKP image is multi‑GB; registry pull is slow | Wait; `oc -n rhel-cla-system describe pod …` — `ErrImagePull` means auth/network, plain `Pulling` means still downloading |
 | `ErrImagePull` / `ImagePullBackOff` | Missing/invalid `redhat-pull-secret` | Re-run `RHEL_PASS=… ./scripts/seed-secrets-from-rhel.sh` |
+| OKP logs `ERR_013` / `tar: Cannot change mode` / `Cannot utime` | Missing tar-wrapper under restricted SCC | Ensure `okp-tar-wrapper-cm.yaml` is applied and mounted; bump `configmap-hash`; wipe PVC only if a partial bad extract remains, then let OKP re-unpack from the image |
+| OKP httpd `AH00111` / `AH01506` / `AH01909` for `MIMIR_*`, `ONLINE_VIEW`, `UNCLASSIFIED_BANNER`, `ASK_RED_HAT_OFFLINE` | Optional/internal env vars unset; httpd `PassEnv` warns | **Same on the Quadlet reference** (`dasm@10.20.1.200`). RH docs only document optional `ACCESS_KEY`, `ONLINE_VIEW`, `SOLR_MEM`, `UNCLASSIFIED_BANNER` ([Customize RHOKP](https://docs.redhat.com/en/documentation/red_hat_offline_knowledge_portal/1/html/install/install-customize_your_red_hat_offline_knowledge_portal_deployment)). `MIMIR_HTTPD_SERVER_NAME`, `MIMIR_MISSING_ACCESS_KEY`, `ASK_RED_HAT_OFFLINE` are **not** documented — do not invent values. Safe to ignore; set `ONLINE_VIEW` / `UNCLASSIFIED_BANNER` only if you want those UI features |
+| Two OKP pods, both not Ready / volume attach errors | RollingUpdate + RWO PVC | Delivered strategy must be **Recreate**; scale/roll so only one ReplicaSet has pods |
+| OKP CrashLoop during first extract (no ERR_013) | Probes too aggressive | Use the long `startupProbe` / soft liveness from `okp-deployment.yaml`; do not shrink those for “faster” CI |
 | Lightspeed Ready but chat fails | Cluster cannot reach `10.20.1.200:8000` | Confirm Granite listens on `0.0.0.0:8000`; open firewalld; test with `verify.sh` / an in-cluster `curl` pod |
-| OKP restarts lose knowledge index | Using emptyDir | Lab overlay uses a **40Gi PVC** (`rh-offline-knowledge-portal-data`) |
+| OKP restarts lose knowledge index | Using emptyDir | Lab uses **40Gi PVC** (`rh-offline-knowledge-portal-data`) |
 | Route TLS / client errors | Edge termination + self-signed / corporate CA | Test with `curl -sk https://<route>/api/lightspeed/liveness` first |
 | Nested SSH seed script hangs | Fragile remote python over password SSH | Prefer current `seed-secrets-from-rhel.sh` (captures to files); or create secrets manually |
 
